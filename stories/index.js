@@ -6,7 +6,7 @@ import { storiesOf } from '@storybook/react';
 import { withState } from '@dump247/storybook-state';
 import UUID from 'uuid';
 import RichText from '../src';
-import * as Doc from '../src/Doc';
+import * as Doc from '../src/model/Doc';
 import * as sampleText from './sampleText';
 
 const initialDocument = R.pipe(
