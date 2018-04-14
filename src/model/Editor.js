@@ -12,8 +12,8 @@ const make = (selection) => ({
 	selection,
 });
 
-// applyingEdit :: (Edit, Doc, Editor) -> Editor
-function applyingEdit(edit, doc, editor) {
+// applyEdit :: (Edit, Doc, Editor) -> Editor
+function applyEdit(edit, doc, editor) {
 	// TODO: `selection` can get out of sync with window selection (e.g. on focus).
 	switch (edit.type) {
 		case Edit.types.replaceText:
@@ -34,6 +34,6 @@ function applyingEdit(edit, doc, editor) {
 
 export {
 	make,
-	applyingEdit,
+	applyEdit,
 };
 

@@ -26,7 +26,7 @@ storiesOf('RichText', module)
 			selection={store.state.editor.selection}
 			onEdit={edit => store.set({
 				doc: Doc.applyEdit(edit, store.state.doc),
-				editor: Editor.applyingEdit(edit, store.state.doc, store.state.editor),
+				editor: Editor.applyEdit(edit, store.state.doc, store.state.editor),
 			})}
 		/>
   )))
