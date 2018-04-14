@@ -29,19 +29,22 @@ function setParagraphContent(id, content, doc) {
 		doc);
 }
 
-function replaceText(anchor, text, doc) {
+// replaceText :: (DocSelection, string, Doc) -> Doc
+function replaceText(range, text, doc) {
+	// TODO: Handle multiple paragraphs
 	return R.over(
-		lenses.paragraphForID(anchor.paragraphID),
-		// TODO: Replace as well as insert
-		paragraph => Paragraph.insertText(text, anchor.offset, paragraph),
+		lenses.paragraphForID(range.anchor.paragraphID),
+		R.pipe(
+			p => Paragraph.removeText(range.anchor.offset, range.focus.offset, p),
+			p => Paragraph.insertText(text, range.anchor.offset, p),
+		),
 		doc);
 }
 
 function applyEdit(edit, doc) {
 	switch (edit.type) {
 		case Edit.types.replaceText:
-			// TODO: handle full selection
-			return replaceText(edit.selection.focus, edit.text, doc);
+			return replaceText(edit.selection, edit.text, doc);
 	}
 }
 

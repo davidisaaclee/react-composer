@@ -15,10 +15,17 @@ const insertText = (text, offset, paragraph) =>
 		content => content.slice(0, offset) + text + content.slice(offset)
 	)(paragraph);
 
+const removeText = (startOffset, endOffset, paragraph) =>
+	R.over(
+		lenses.content,
+		content => content.slice(0, startOffset) + content.slice(endOffset)
+	)(paragraph);
+
 export {
 	make,
 	empty,
 	content,
 	insertText,
+	removeText,
 };
 
