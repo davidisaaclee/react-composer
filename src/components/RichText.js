@@ -82,6 +82,7 @@ function getSelection() {
 const RichText = ({ document: doc, onEdit, ...restProps }) => {
 	function handleKeyPress(evt) {
 		onEdit(Edit.insertText(docSelectionFromNativeSelection(getSelection()), evt.key));
+		evt.preventDefault();
 	}
 
 	return (

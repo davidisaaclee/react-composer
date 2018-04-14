@@ -1,6 +1,7 @@
 import * as R from 'ramda';
 import UUID from 'uuid';
 import * as Paragraph from './Paragraph';
+import * as Edit from './Edit';
 
 const lenses = {
 	paragraphOrder: R.lensProp('paragraphOrder'),
@@ -28,6 +29,21 @@ function setParagraphContent(id, content, doc) {
 		doc);
 }
 
+function insertText(anchor, text, doc) {
+	return R.over(
+		lenses.paragraphForID(anchor.paragraphID),
+		paragraph => Paragraph.insertText(text, anchor.offset, paragraph),
+		doc);
+}
+
+function applyEdit(edit, doc) {
+	switch (edit.type) {
+		case Edit.types.insertText:
+			// TODO: handle full selection
+			return insertText(edit.selection.focus, edit.text, doc);
+	}
+}
+
 // paragraphList :: Doc -> [{ id: ParagraphID, paragraph: Paragraph }]
 function paragraphList(doc) {
 	return R.pipe(
@@ -42,6 +58,7 @@ export {
 	empty,
 	appendParagraph,
 	setParagraphContent,
+	applyEdit,
 	paragraphList,
 };
 

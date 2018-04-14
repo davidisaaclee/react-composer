@@ -20,7 +20,7 @@ storiesOf('RichText', module)
   .add('basic', withState({ doc: initialDocument }, (store) => (
 		<RichText
 			document={store.state.doc}
-			onEdit={action('onEdit')}
+			onEdit={edit => store.set({ doc: Doc.applyEdit(edit, store.state.doc) })}
 		/>
   )))
 
