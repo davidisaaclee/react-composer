@@ -136,7 +136,7 @@ class RichText extends React.Component {
 	// -- Events
 
 	handleKeyPress(evt) {
-		this.props.onEdit(Edit.insertText(docSelectionFromNativeSelection(getSelection()), evt.key));
+		this.props.onEdit(Edit.replaceText(docSelectionFromNativeSelection(getSelection()), evt.key));
 		evt.preventDefault();
 	}
 

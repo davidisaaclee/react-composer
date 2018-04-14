@@ -2,12 +2,12 @@
 const types = {
 	// Either inserting text at a caret (empty `selection`),
 	// or replacing a selection of text with new text.
-	insertText: 'insertText'
+	replaceText: 'replaceText'
 };
 
-// insertText :: (DocSelection, string) -> Edit
-const insertText = (selection, text) => ({
-	type: types.insertText,
+// replaceText :: (DocSelection, string) -> Edit
+const replaceText = (selection, text) => ({
+	type: types.replaceText,
 	selection,
 	text
 });
@@ -15,6 +15,6 @@ const insertText = (selection, text) => ({
 
 export {
 	types,
-	insertText,
+	replaceText,
 };
 
