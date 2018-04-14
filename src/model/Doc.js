@@ -2,7 +2,7 @@ import * as R from 'ramda';
 import UUID from 'uuid';
 import * as Paragraph from './Paragraph';
 import * as Edit from './Edit';
-import * as Doc from './Doc';
+import * as AnchorRange from './AnchorRange';
 
 const lenses = {
 	paragraphOrder: R.lensProp('paragraphOrder'),
@@ -31,16 +31,16 @@ function setParagraphContent(id, content, doc) {
 }
 
 // replaceText :: (DocSelection, string, Doc) -> Doc
-function replaceText(range, text, doc) {
-	// TODO: Handle multiple paragraphs
-	const [start, end] =
-		Doc.sortAnchorsAscending([range.anchor, range.focus], doc);
+function replaceText(selection, text, doc) {
+	const anchorRange =
+		anchorRangeFromSelection(selection, doc);
 
 	return R.over(
-		lenses.paragraphForID(range.anchor.paragraphID),
+		// TODO: Handle multiple paragraphs
+		lenses.paragraphForID(selection.anchor.paragraphID),
 		R.pipe(
-			p => Paragraph.insertText(text, end.offset, p),
-			p => Paragraph.removeText(start.offset, end.offset, p),
+			p => Paragraph.insertText(text, anchorRange.end.offset, p),
+			p => Paragraph.removeText(anchorRange.start.offset, anchorRange.end.offset, p),
 		),
 		doc);
 }
@@ -70,6 +70,13 @@ function sortAnchorsAscending(anchors, doc) {
 	], anchors);
 }
 
+function anchorRangeFromSelection(selection, doc) {
+	const [start, end] =
+		sortAnchorsAscending([selection.anchor, selection.focus], doc);
+
+	return AnchorRange.make(start, end);
+}
+
 export {
 	lenses,
 	make,
@@ -79,5 +86,6 @@ export {
 	applyEdit,
 	paragraphList,
 	sortAnchorsAscending,
+	anchorRangeFromSelection,
 };
 

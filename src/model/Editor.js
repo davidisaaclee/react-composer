@@ -17,17 +17,15 @@ function applyEdit(edit, doc, editor) {
 	// TODO: `selection` can get out of sync with window selection (e.g. on focus).
 	switch (edit.type) {
 		case Edit.types.replaceText:
-			const [start, end] =
-				Doc.sortAnchorsAscending(
-					[edit.selection.anchor, edit.selection.focus],
-					doc);
+			const anchorRange =
+				Doc.anchorRangeFromSelection(edit.selection, doc);
 
 			return R.set(
 				lenses.selection,
 				DocSelection.makeCollapsed(
 					Anchor.offsetBy(
 						edit.text.length,
-						start)),
+						anchorRange.start)),
 				editor);
 	}
 }
