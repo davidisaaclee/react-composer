@@ -7,6 +7,7 @@ import { withState } from '@dump247/storybook-state';
 import UUID from 'uuid';
 import RichText from '../src';
 import * as Doc from '../src/model/Doc';
+import * as Editor from '../src/model/Editor';
 import * as sampleText from './sampleText';
 
 const initialDocument = R.pipe(
@@ -16,11 +17,17 @@ const initialDocument = R.pipe(
 	d => Doc.setParagraphContent('p2', sampleText.alice[1], d),
 )(Doc.empty);
 
+const initialEditor = Editor.make(null);
+
 storiesOf('RichText', module)
-  .add('basic', withState({ doc: initialDocument }, (store) => (
+  .add('basic', withState({ doc: initialDocument, editor: initialEditor }, (store) => (
 		<RichText
 			document={store.state.doc}
-			onEdit={edit => store.set({ doc: Doc.applyEdit(edit, store.state.doc) })}
+			selection={store.state.editor.selection}
+			onEdit={edit => store.set({
+				doc: Doc.applyEdit(edit, store.state.doc),
+				editor: Editor.applyingEdit(edit, store.state.editor),
+			})}
 		/>
   )))
 
