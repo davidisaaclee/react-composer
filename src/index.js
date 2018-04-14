@@ -26,12 +26,16 @@ const DocSelection = {
 
 export const Edit = {
 	types: {
+		// Either inserting text at a caret (empty `selection`),
+		// or replacing a selection of text with new text.
 		insertText: 'insertText'
 	},
 
-	insertText: (startAnchor, text) => ({
+	// insertText :: (DocSelection, string) -> Edit
+	insertText: (selection, text) => ({
 		type: Edit.types.insertText,
-		startAnchor, text
+		selection,
+		text
 	}),
 };
 
@@ -97,7 +101,7 @@ function docSelectionFromNativeSelection(selection) {
 // onEdit :: RichText.Edit -> ()
 const RichText = ({ document: doc, onEdit, ...restProps }) => {
 	function handleKeyPress(evt) {
-		onEdit(Edit.insertText({}, evt.key));
+		onEdit(Edit.insertText(docSelectionFromNativeSelection(window.getSelection()), evt.key));
 	}
 
 	return (
