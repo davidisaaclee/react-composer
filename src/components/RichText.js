@@ -71,12 +71,17 @@ const EditorContainer = ({ editable = false, ...restProps }) => (
 	/>
 );
 
+function getSelection() {
+	// TODO: Cross-browser support
+	return window.getSelection();
+}
+
 
 // document :: Doc
 // onEdit :: RichText.Edit -> ()
 const RichText = ({ document: doc, onEdit, ...restProps }) => {
 	function handleKeyPress(evt) {
-		onEdit(Edit.insertText(docSelectionFromNativeSelection(window.getSelection()), evt.key));
+		onEdit(Edit.insertText(docSelectionFromNativeSelection(getSelection()), evt.key));
 	}
 
 	return (
