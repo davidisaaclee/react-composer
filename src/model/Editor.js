@@ -1,6 +1,7 @@
 import * as R from 'ramda';
 import * as Edit from './Edit';
 import * as Anchor from './Anchor';
+import * as Doc from './Doc';
 import * as DocSelection from './DocSelection';
 
 const lenses = {
@@ -11,19 +12,22 @@ const make = (selection) => ({
 	selection,
 });
 
-// applyingEdit :: (Edit, Editor) -> Editor
-function applyingEdit(edit, editor) {
+// applyingEdit :: (Edit, Doc, Editor) -> Editor
+function applyingEdit(edit, doc, editor) {
 	// TODO: `selection` can get out of sync with window selection (e.g. on focus).
 	switch (edit.type) {
 		case Edit.types.replaceText:
-			// TODO: Using the `anchor` here is wrong - should use the 
-			// start of the selection.
+			const [start, end] =
+				Doc.sortAnchorsAscending(
+					[edit.selection.anchor, edit.selection.focus],
+					doc);
+
 			return R.set(
 				lenses.selection,
 				DocSelection.makeCollapsed(
 					Anchor.offsetBy(
 						edit.text.length,
-						edit.selection.anchor)),
+						start)),
 				editor);
 	}
 }
