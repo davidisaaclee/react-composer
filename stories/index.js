@@ -9,15 +9,18 @@ import RichText from '../src';
 import * as Doc from '../src/Doc';
 import * as sampleText from './sampleText';
 
+const initialDocument = R.pipe(
+	d => Doc.appendParagraph('p1', d),
+	d => Doc.appendParagraph('p2', d),
+	d => Doc.setParagraphContent('p1', sampleText.alice[0], d),
+	d => Doc.setParagraphContent('p2', sampleText.alice[1], d),
+)(Doc.empty);
+
 storiesOf('RichText', module)
-  .add('basic', () => (
+  .add('basic', withState({ doc: initialDocument }, (store) => (
 		<RichText
-			document={R.pipe(
-				d => Doc.appendParagraph('p1', d),
-				d => Doc.appendParagraph('p2', d),
-				d => Doc.setParagraphContent('p1', sampleText.alice[0], d),
-				d => Doc.setParagraphContent('p2', sampleText.alice[1], d),
-			)(Doc.empty)}
+			document={store.state.doc}
+			onEdit={action('onEdit')}
 		/>
-  ))
+  )))
 
