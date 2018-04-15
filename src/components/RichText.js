@@ -154,6 +154,16 @@ class RichText extends React.Component {
 					return Edit.replaceText(
 							docSelectionFromNativeSelection(getSelection()),
 							command.text);
+
+				case EditorCommand.types.paragraphBreak:
+					// TODO: Real paragraph break
+					return Edit.replaceText(
+						docSelectionFromNativeSelection(getSelection()),
+						`NEW LINE Y'ALL`);
+
+				default:
+					console.error("Unrecognized command type", command.type);
+					return null;
 			}
 		}
 

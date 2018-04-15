@@ -9,13 +9,24 @@
 
 const types = {
 	text: 'text',
+	paragraphBreak: 'paragraphBreak',
 };
 
-const text = text => ({ type: types.text, text });
+const make = (type, fields = {}) => ({ type, ...fields });
+
+// text :: string -> EditorCommand
+const text = text => make(types.text, { text });
+
+// paragraphBreak :: EditorCommand
+const paragraphBreak = make(types.paragraphBreak);
 
 // fromKeyEvent :: KeyEvent -> EditorCommand?
 function fromKeyEvent(keyEvent) {
-	return text(keyEvent.key);
+	if (keyEvent.key === 'Enter') {
+		return paragraphBreak;
+	} else {
+		return text(keyEvent.key);
+	}
 }
 
 export {
