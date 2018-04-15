@@ -44,6 +44,8 @@ function idForParagraphAtIndex(index, doc) {
 }
 
 // containsPosition :: (DocPosition, Doc) -> boolean
+// Note: A Doc contains a position "after" the last character. A 1-character Doc has two
+// valid positions.
 function containsPosition(position, doc) {
 	const paragraphID =
 		idForParagraphAtIndex(position.paragraphIndex, doc);
@@ -55,7 +57,7 @@ function containsPosition(position, doc) {
 	const paragraph =
 		R.view(lenses.paragraphForID(paragraphID))(doc);
 
-	if (position.offset < 0 || position.offset >= Paragraph.content(paragraph).length) {
+	if (position.offset < 0 || position.offset > Paragraph.content(paragraph).length) {
 		return false;
 	}
 
@@ -63,6 +65,8 @@ function containsPosition(position, doc) {
 }
 
 // containsPointer :: (DocPointer, Doc) -> boolean
+// Note: A Doc contains a pointer "after" the last character. A 1-character Doc has two
+// valid pointers.
 function containsPointer(pointer, doc) {
 	const paragraph =
 		R.view(lenses.paragraphForID(pointer.paragraphID))(doc);
@@ -71,7 +75,7 @@ function containsPointer(pointer, doc) {
 		return false;
 	}
 
-	if (pointer.offset < 0 || pointer.offset >= Paragraph.content(paragraph).length) {
+	if (pointer.offset < 0 || pointer.offset > Paragraph.content(paragraph).length) {
 		return false;
 	}
 
@@ -194,6 +198,48 @@ function splitParagraph(splitPosition, doc) {
 	)(doc);
 }
 
+// mergeParagraphsInRange :: (number, number, Doc) -> Doc
+// Merges the content of the paragraphs between and including the specified
+// paragraph indices into the first paragraph.
+// If the range is invalid, empty, or has a single element, returns the original
+// Doc.
+function mergeParagraphsInRange(firstParagraphIndex, lastParagraphIndex, doc) {
+	// If range contains fewer than two elements, return original doc.
+	if (Math.abs(firstParagraphIndex - lastParagraphIndex) < 1) {
+		return doc;
+	}
+
+	// If invalid range, return original doc.
+	if (lastParagraphIndex < firstParagraphIndex) {
+		return doc;
+	}
+
+	const indicesOfParagraphsToMergeIntoInitial =
+		R.range(firstParagraphIndex + 1, lastParagraphIndex + 1);
+
+	return R.pipe(
+		// Accumulate paragraphs in initial paragraph.
+		R.over(
+			lenses.paragraphForID(idForParagraphAtIndex(firstParagraphIndex, doc)),
+			initialParagraph => R.reduce(
+				Paragraph.merge,
+				initialParagraph,
+				R.map(
+					index => R.view(
+						lenses.paragraphForID(idForParagraphAtIndex(index, doc)),
+						doc),
+					indicesOfParagraphsToMergeIntoInitial))),
+		// Remove paragraphs that were merged into the initial paragraph.
+		d => R.reduce(
+			(doc, paragraphID) => removeParagraph(paragraphID, doc),
+			d,
+			R.map(
+				index => idForParagraphAtIndex(index, d),
+				indicesOfParagraphsToMergeIntoInitial)
+		),
+	)(doc);
+}
+
 // removeParagraph :: (ParagraphID, Doc) -> Doc
 function removeParagraph(id, doc) {
 	const paragraphIndex = R.pipe(
@@ -215,11 +261,43 @@ function removeParagraph(id, doc) {
 
 // removeText :: (Range DocPointer, Doc) -> Doc
 function removeText(range, doc) {
-	return R.over(
-		// TODO: Handle multiple paragraphs
-		lenses.paragraphForID(range.start.paragraphID),
-		p => Paragraph.removeText(range.start.offset, range.end.offset, p),
-		doc);
+	if (range.start.paragraphID === range.end.paragraphID) {
+		// If the range stays within one paragraph, just edit the paragraph.
+		return R.over(
+			lenses.paragraphForID(range.start.paragraphID),
+			p => Paragraph.removeText(range.start.offset, range.end.offset, p),
+			doc);
+	} else {
+		// Gather the partial paragraphs to remove...
+		const firstParagraphRemovalRange =
+			pointerRangeToEndOfParagraphFrom(range.start, doc);
+		const lastParagraphRemovalRange =
+			pointerRangeFromStartOfParagraphTo(range.end, doc);
+
+		// ... and the full paragraphs to remove.
+		const startParagraphIndex =
+			indexOfParagraph(range.start.paragraphID, doc);
+		const endParagraphIndex =
+			indexOfParagraph(range.end.paragraphID, doc);
+		const idsOfFullParagraphsInRange = R.pipe(
+			R.view(lenses.paragraphOrder),
+			R.slice(startParagraphIndex + 1, endParagraphIndex)
+		)(doc);
+
+		// Then, remove them.
+		return R.pipe(
+			d => removeText(firstParagraphRemovalRange, d),
+			d => removeText(lastParagraphRemovalRange, d),
+			d => R.reduce(
+				(doc, paragraphID) => removeParagraph(paragraphID, doc),
+				d,
+				idsOfFullParagraphsInRange),
+			d => mergeParagraphsInRange(
+				startParagraphIndex,
+				endParagraphIndex - idsOfFullParagraphsInRange.length,
+				d),
+		)(doc);
+	}
 }
 
 // removeText :: (DocPointer, string, Doc) -> Doc
@@ -238,8 +316,8 @@ function applyEdit(edit, doc) {
 			pointerRangeFromSelection(edit.selection, doc);
 
 		return R.pipe(
-			d => insertText(pointerRange.end, edit.text, d),
 			d => removeText(pointerRange, d),
+			d => insertText(pointerRange.start, edit.text, d),
 		)(doc);
 	} else if (edit.type === Edit.types.replaceTextWithParagraphBreak) {
 		const pointerRange =
@@ -264,6 +342,49 @@ function applyEdit(edit, doc) {
 		console.error("Unhandled edit type:", edit.type);
 		return doc;
 	}
+}
+
+
+// -- Helpers
+
+// pointerRangeToEndOfParagraph :: DocPointer -> (Range DocPointer)?
+// Creates a pointer range from the specified pointer to the end of that pointer's 
+// containing paragraph.
+// If the pointer is not in the Doc, returns null.
+function pointerRangeToEndOfParagraphFrom(startPointer, doc) {
+	if (!containsPointer(startPointer, doc)) {
+		return null;
+	}
+
+	const endOffset =
+		R.pipe(
+			R.view(lenses.paragraphForID(startPointer.paragraphID)),
+			Paragraph.content,
+			R.length
+		)(doc);
+	const endPointer =
+		DocPointer.make(startPointer.paragraphID, endOffset);
+
+	return Range.make(
+		startPointer,
+		endPointer);
+}
+
+// pointerRangeFromStartOfParagraphTo :: DocPointer -> (Range DocPointer)?
+// Creates a pointer range from the specified pointer's paragraph beginning
+// to the specified pointer.
+// If the pointer is not in the Doc, returns null.
+function pointerRangeFromStartOfParagraphTo(endPointer, doc) {
+	if (!containsPointer(endPointer, doc)) {
+		return null;
+	}
+
+	const startPointer =
+		DocPointer.make(endPointer.paragraphID, 0);
+
+	return Range.make(
+		startPointer,
+		endPointer);
 }
 
 export {

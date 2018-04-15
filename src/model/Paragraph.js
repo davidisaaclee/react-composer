@@ -18,6 +18,9 @@ const insertText = (text, offset, paragraph) =>
 		content => content.slice(0, offset) + text + content.slice(offset)
 	)(paragraph);
 
+const appendText = (text, paragraph) =>
+	insertText(text, content(paragraph).length, paragraph);
+
 const removeText = (startOffset, endOffset, paragraph) =>
 	R.over(
 		lenses.content,
@@ -30,12 +33,17 @@ const split = (offset, paragraph) => ({
 	after: make(content(paragraph).slice(offset)),
 });
 
+// merge :: (Paragraph, Paragraph) -> Paragraph
+const merge = (p1, p2) => appendText(content(p2), p1);
+
 export {
 	make,
 	empty,
 	content,
 	insertText,
+	appendText,
 	removeText,
 	split,
+	merge,
 };
 
