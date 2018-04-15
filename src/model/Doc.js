@@ -188,7 +188,7 @@ function removeParagraph(id, doc) {
 	)(doc);
 }
 
-// removeText :: (Range, Doc) -> Doc
+// removeText :: (Range DocPointer, Doc) -> Doc
 function removeText(range, doc) {
 	return R.over(
 		// TODO: Handle multiple paragraphs
@@ -258,6 +258,7 @@ function sortPositionsAscending(pointers, doc) {
 	], pointers);
 }
 
+// pointerRangeFromSelection :: (DocSelection, Doc) -> Range DocPointer
 function pointerRangeFromSelection(selection, doc) {
 	const [start, end] =
 		sortPositionsAscending([selection.anchor, selection.focus], doc);

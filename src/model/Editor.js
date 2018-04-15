@@ -8,6 +8,7 @@ const lenses = {
 	selection: R.lensProp('selection')
 };
 
+// make :: DocSelection -> Editor
 const make = (selection) => ({
 	selection,
 });
