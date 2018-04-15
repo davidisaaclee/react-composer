@@ -14,13 +14,46 @@ function make(paragraphOrder, allParagraphs) {
 	return { paragraphOrder, allParagraphs };
 }
 
+// empty :: Doc
 const empty = make([], {});
 
-function appendParagraph(id = UUID(), doc) {
+// indexOfParagraph :: (ParagraphID, Doc) -> number?
+function indexOfParagraph(paragraphID, doc) {
 	return R.pipe(
-		R.set(lenses.paragraphForID(id), Paragraph.empty),
-		R.over(lenses.paragraphOrder, R.append(id))
+		R.view(lenses.paragraphOrder),
+		R.indexOf(paragraphID)
 	)(doc);
+}
+
+// insertParagraph :: (ParagraphID, number, Doc) -> Doc
+// Inserts an empty paragraph at the specified index, shuffling
+// the paragraph in that position and above to higher indices.
+function insertParagraph(id, index, doc) {
+	return insertPremadeParagraph(id, index, Paragraph.empty, doc);
+}
+
+// insertPremadeParagraph :: (ParagraphID, number, Doc) -> Doc
+// Inserts an empty paragraph at the specified index, shuffling
+// the paragraph in that position and above to higher indices.
+// TODO: Make this the default `insertParagraph`;
+// change `insertParagraph` to `insertEmptyParagraph` or remove
+function insertPremadeParagraph(id, index, paragraph, doc) {
+	return R.pipe(
+		R.set(lenses.paragraphForID(id), paragraph),
+		R.over(lenses.paragraphOrder, R.insert(index, id))
+	)(doc);
+}
+
+// appendParagraph :: (ParagraphID, Doc) -> Doc
+// Inserts an empty paragraph at the end of the paragraph list.
+function appendParagraph(id, doc) {
+	const indexPastEnd =
+		R.pipe(R.view(lenses.paragraphOrder), R.length)(doc);
+
+	return insertParagraph(
+		id,
+		indexPastEnd,
+		doc);
 }
 
 function setParagraphContent(id, content, doc) {
@@ -28,6 +61,58 @@ function setParagraphContent(id, content, doc) {
 		lenses.paragraphForID(id),
 		paragraph => content,
 		doc);
+}
+
+// splitParagraph :: (DocPosition, Doc) -> Doc
+function splitParagraph(position, doc) {
+	const paragraphIndex = R.pipe(
+		R.view(lenses.paragraphOrder),
+		R.indexOf(position.paragraphID)
+	)(doc);
+
+	const beforeSplitParagraphID = UUID();
+	const afterSplitParagraphID = UUID();
+
+	const { before, after } =
+		Paragraph.split(
+			position.offset,
+			R.view(lenses.paragraphForID(position.paragraphID), doc));
+
+	return R.pipe(
+		d => insertPremadeParagraph(
+			beforeSplitParagraphID,
+			paragraphIndex,
+			before,
+			d),
+		d => insertPremadeParagraph(
+			afterSplitParagraphID,
+			// The original paragraph has shuffled up an index;
+			// to index past it, increment its original index once to 
+			// represent that shuffle, and once to move past it.
+			paragraphIndex + 2,
+			after,
+			d),
+		d => removeParagraph(position.paragraphID, d)
+	)(doc);
+}
+
+// removeParagraph :: (ParagraphID, Doc) -> Doc
+function removeParagraph(id, doc) {
+	const paragraphIndex = R.pipe(
+		R.view(lenses.paragraphOrder),
+		R.indexOf(id)
+	)(doc);
+
+	return R.pipe(
+		// Remove from order list.
+		R.over(
+			lenses.paragraphOrder,
+			R.remove(paragraphIndex, 1)),
+		// Remove from paragraph dictionary.
+		R.over(
+			lenses.allParagraphs,
+			R.dissoc(id))
+	)(doc);
 }
 
 // removeText :: (Range, Doc) -> Doc
@@ -49,15 +134,35 @@ function insertText(position, text, doc) {
 
 // applyEdit :: (Edit, Doc) -> Doc
 function applyEdit(edit, doc) {
-	switch (edit.type) {
-		case Edit.types.replaceText:
-			const positionRange =
-				positionRangeFromSelection(edit.selection, doc);
+	if (edit.type === Edit.types.replaceText) {
+		const positionRange =
+			positionRangeFromSelection(edit.selection, doc);
 
-			return R.pipe(
-				d => insertText(positionRange.end, edit.text, d),
-				d => removeText(positionRange, d),
-			)(doc);
+		return R.pipe(
+			d => insertText(positionRange.end, edit.text, d),
+			d => removeText(positionRange, d),
+		)(doc);
+	} else if (edit.type === Edit.types.replaceTextWithParagraphBreak) {
+		const positionRange =
+			positionRangeFromSelection(edit.selection, doc);
+		const newParagraphID =
+			UUID();
+
+		return R.pipe(
+			d => splitParagraph(
+				positionRange.end,
+				d),
+			/*
+			d => insertParagraph(
+				newParagraphID,
+				indexOfParagraph(positionRange.end.paragraphID, d) + 1,
+				d),
+			d => removeText(positionRange, d),
+				*/
+		)(doc);
+	} else {
+		console.error("Unhandled edit type:", edit.type);
+		return doc;
 	}
 }
 
@@ -90,6 +195,7 @@ export {
 	lenses,
 	make,
 	empty,
+	indexOfParagraph,
 	appendParagraph,
 	setParagraphContent,
 	applyEdit,

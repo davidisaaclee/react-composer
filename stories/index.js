@@ -24,10 +24,19 @@ storiesOf('RichText', module)
 		<RichText
 			document={store.state.doc}
 			selection={store.state.editor.selection}
-			onEdit={edit => store.set({
-				doc: Doc.applyEdit(edit, store.state.doc),
-				editor: Editor.applyEdit(edit, store.state.doc, store.state.editor),
-			})}
+			onEdit={edit => {
+				const doc = Doc.applyEdit(edit, store.state.doc);
+				const newState = {
+					doc,
+					editor: Editor.applyEdit(
+						edit,
+						store.state.doc,
+						doc,
+						store.state.editor),
+				};
+				console.log("Did update state:", newState);
+				store.set(newState);
+			}}
 		/>
   )))
 
