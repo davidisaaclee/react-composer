@@ -1,5 +1,5 @@
 
-// make :: (Anchor, Anchor) -> AnchorRange
+// make :: (a, a) -> Range a
 const make = (start, end) => ({ start, end });
 
 export {

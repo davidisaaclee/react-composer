@@ -2,7 +2,7 @@ import * as R from 'ramda';
 import UUID from 'uuid';
 import * as Paragraph from './Paragraph';
 import * as Edit from './Edit';
-import * as AnchorRange from './AnchorRange';
+import * as Range from './Range';
 
 const lenses = {
 	paragraphOrder: R.lensProp('paragraphOrder'),
@@ -30,7 +30,7 @@ function setParagraphContent(id, content, doc) {
 		doc);
 }
 
-// removeText :: (AnchorRange, Doc) -> Doc
+// removeText :: (Range, Doc) -> Doc
 function removeText(range, doc) {
 	return R.over(
 		// TODO: Handle multiple paragraphs
@@ -39,11 +39,11 @@ function removeText(range, doc) {
 		doc);
 }
 
-// removeText :: (Anchor, string, Doc) -> Doc
-function insertText(anchor, text, doc) {
+// removeText :: (DocPosition, string, Doc) -> Doc
+function insertText(position, text, doc) {
 	return R.over(
-		lenses.paragraphForID(anchor.paragraphID),
-		p => Paragraph.insertText(text, anchor.offset, p),
+		lenses.paragraphForID(position.paragraphID),
+		p => Paragraph.insertText(text, position.offset, p),
 		doc);
 }
 
@@ -51,12 +51,12 @@ function insertText(anchor, text, doc) {
 function applyEdit(edit, doc) {
 	switch (edit.type) {
 		case Edit.types.replaceText:
-			const anchorRange =
-				anchorRangeFromSelection(edit.selection, doc);
+			const positionRange =
+				positionRangeFromSelection(edit.selection, doc);
 
 			return R.pipe(
-				d => insertText(anchorRange.end, edit.text, d),
-				d => removeText(anchorRange, d),
+				d => insertText(positionRange.end, edit.text, d),
+				d => removeText(positionRange, d),
 			)(doc);
 	}
 }
@@ -69,21 +69,21 @@ function paragraphList(doc) {
 	)(doc);
 }
 
-// sortAnchorsAscending :: ([Anchor], Doc) -> [Anchor]
-// Sorts the specified anchors, with anchors closer to the beginning of
+// sortPositionsAscending :: ([DocPosition], Doc) -> [DocPosition]
+// Sorts the specified positions, with positions closer to the beginning of
 // the doc occurring closer to the beginning of the sorted list.
-function sortAnchorsAscending(anchors, doc) {
+function sortPositionsAscending(positions, doc) {
 	return R.sortWith([
-		R.ascend(anchor => doc.paragraphOrder.indexOf(anchor.paragraphID)),
-		R.ascend(anchor => anchor.offset)
-	], anchors);
+		R.ascend(position => doc.paragraphOrder.indexOf(position.paragraphID)),
+		R.ascend(position => position.offset)
+	], positions);
 }
 
-function anchorRangeFromSelection(selection, doc) {
+function positionRangeFromSelection(selection, doc) {
 	const [start, end] =
-		sortAnchorsAscending([selection.anchor, selection.focus], doc);
+		sortPositionsAscending([selection.anchor, selection.focus], doc);
 
-	return AnchorRange.make(start, end);
+	return Range.make(start, end);
 }
 
 export {
@@ -94,7 +94,7 @@ export {
 	setParagraphContent,
 	applyEdit,
 	paragraphList,
-	sortAnchorsAscending,
-	anchorRangeFromSelection,
+	sortPositionsAscending,
+	positionRangeFromSelection,
 };
 

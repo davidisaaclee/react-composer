@@ -3,7 +3,7 @@ import React from 'react';
 import * as Doc from '../model/Doc';
 import * as ParagraphUtils from '../model/Paragraph';
 import * as Edit from '../model/Edit';
-import * as Anchor from '../model/Anchor';
+import * as DocPosition from '../model/DocPosition';
 import * as DocSelection from '../model/DocSelection';
 
 const k = {
@@ -51,8 +51,8 @@ function docSelectionFromNativeSelection(selection) {
 	}
 
 	// TODO: There should be a defined mapping between `Selection`'s offsets and model offsets.
-	const anchor = Anchor.make(anchorParagraphID, selection.anchorOffset);
-	const focus = Anchor.make(focusParagraphID, selection.focusOffset);
+	const anchor = DocPosition.make(anchorParagraphID, selection.anchorOffset);
+	const focus = DocPosition.make(focusParagraphID, selection.focusOffset);
 	return DocSelection.make(anchor, focus);
 }
 
@@ -106,10 +106,10 @@ class RichText extends React.Component {
 		return this.editorContainerRef.querySelector(selectorForParagraphID);
 	}
 	
-	// nodeAndOffsetFromAnchor :: (Anchor) -> { node: Node, offset: number }?
-	// Returns the text node and offset within that node for the specified `Anchor`.
-	nodeAndOffsetFromAnchor(anchor) {
-		const node = this.queryParagraphNode(anchor.paragraphID);
+	// nodeAndOffsetFromPosition :: (DocPosition) -> { node: Node, offset: number }?
+	// Returns the text node and offset within that node for the specified `DocPosition`.
+	nodeAndOffsetFromPosition(position) {
+		const node = this.queryParagraphNode(position.paragraphID);
 		if (node == null) {
 			return null;
 		}
@@ -117,14 +117,14 @@ class RichText extends React.Component {
 		// TODO: This assumes that all tagged paragraphs have a single text node as a child.
 		const textNode = node.firstChild;
 
-		return { node: textNode, offset: anchor.offset };
+		return { node: textNode, offset: position.offset };
 	}
 
 	// rangeFromSelection :: DocSelection -> Range
 	rangeFromSelection(selection) {
 		// TODO: Should use start/end instead of anchor/focus
-		const start = this.nodeAndOffsetFromAnchor(selection.anchor);
-		const end = this.nodeAndOffsetFromAnchor(selection.focus);
+		const start = this.nodeAndOffsetFromPosition(selection.anchor);
+		const end = this.nodeAndOffsetFromPosition(selection.focus);
 
 		const range = document.createRange();
 		range.setStart(start.node, start.offset);

@@ -1,6 +1,6 @@
 import * as R from 'ramda';
 import * as Edit from './Edit';
-import * as Anchor from './Anchor';
+import * as DocPosition from './DocPosition';
 import * as Doc from './Doc';
 import * as DocSelection from './DocSelection';
 
@@ -17,15 +17,15 @@ function applyEdit(edit, doc, editor) {
 	// TODO: `selection` can get out of sync with window selection (e.g. on focus).
 	switch (edit.type) {
 		case Edit.types.replaceText:
-			const anchorRange =
-				Doc.anchorRangeFromSelection(edit.selection, doc);
+			const positionRange =
+				Doc.positionRangeFromSelection(edit.selection, doc);
 
 			return R.set(
 				lenses.selection,
 				DocSelection.makeCollapsed(
-					Anchor.offsetBy(
+					DocPosition.offsetBy(
 						edit.text.length,
-						anchorRange.start)),
+						positionRange.start)),
 				editor);
 	}
 }

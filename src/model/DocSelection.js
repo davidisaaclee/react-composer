@@ -1,11 +1,11 @@
-// make :: (Anchor, Anchor) -> DocSelection
+// make :: (DocPosition, DocPosition) -> DocSelection
 // anchor - where the selection action began
 // focus - where the selection action ended
 const make = (anchor, focus) => ({ anchor, focus });
 
-// makeCollapsed :: (Anchor) -> DocSelection
+// makeCollapsed :: (DocPosition) -> DocSelection
 // Creates a selection with equivalent anchor and focus.
-const makeCollapsed = (anchor) => make(anchor, anchor);
+const makeCollapsed = (position) => make(position, position);
 
 export {
 	make,
