@@ -40,7 +40,7 @@ function idForParagraphAtIndex(index, doc) {
 // containsPosition :: (DocPosition, Doc) -> boolean
 function containsPosition(position, doc) {
 	const paragraphID =
-		idForParagraphAtIndex(position.paragraphIndex);
+		idForParagraphAtIndex(position.paragraphIndex, doc);
 
 	if (paragraphID == null) {
 		return false;
@@ -80,7 +80,7 @@ function pointerFromPosition(position, doc) {
 	}
 
 	return DocPointer.make(
-		idForParagraphAtIndex(position.paragraphIndex),
+		idForParagraphAtIndex(position.paragraphIndex, doc),
 		position.offset);
 }
 
@@ -92,8 +92,8 @@ function positionFromPointer(pointer, doc) {
 	}
 
 	return DocPosition.make(
-		indexOfParagraph(pointer.paragraphForID, doc),
-		position.offset);
+		indexOfParagraph(pointer.paragraphID, doc),
+		pointer.offset);
 }
 
 // insertParagraph :: (ParagraphID, number, Doc) -> Doc
