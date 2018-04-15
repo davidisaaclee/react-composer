@@ -5,6 +5,7 @@ import * as ParagraphUtils from '../model/Paragraph';
 import * as Edit from '../model/Edit';
 import * as DocPosition from '../model/DocPosition';
 import * as DocSelection from '../model/DocSelection';
+import * as EditorCommand from './EditorCommand';
 
 const k = {
 	paragraphIDAttributeKey: 'data-paragraph-id'
@@ -147,8 +148,22 @@ class RichText extends React.Component {
 	// -- Events
 
 	handleKeyPress(evt) {
-		this.props.onEdit(Edit.replaceText(docSelectionFromNativeSelection(getSelection()), evt.key));
-		evt.preventDefault();
+		function editForCommand(command) {
+			switch (command.type) {
+				case EditorCommand.types.text:
+					return Edit.replaceText(
+							docSelectionFromNativeSelection(getSelection()),
+							command.text);
+			}
+		}
+
+		const command = EditorCommand.fromKeyEvent(evt);
+
+		if (command != null) {
+			const edit = editForCommand(command);
+			this.props.onEdit(edit);
+			evt.preventDefault();
+		}
 	}
 
 	renderSelection(selection) {
