@@ -110,7 +110,7 @@ class RichText extends React.Component {
 		}
 
 		const selectorForParagraphID =
-			`[${k.paragraphIDAttributeKey}=${paragraphID}]`;
+			`[${k.paragraphIDAttributeKey}="${paragraphID}"]`;
 		return this.editorContainerRef.querySelector(selectorForParagraphID);
 	}
 	
