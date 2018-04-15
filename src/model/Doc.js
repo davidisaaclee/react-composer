@@ -3,6 +3,8 @@ import UUID from 'uuid';
 import * as Paragraph from './Paragraph';
 import * as Edit from './Edit';
 import * as Range from './Range';
+import * as DocPointer from './DocPointer';
+import * as DocPosition from './DocPosition';
 
 const lenses = {
 	paragraphOrder: R.lensProp('paragraphOrder'),
@@ -23,6 +25,75 @@ function indexOfParagraph(paragraphID, doc) {
 		R.view(lenses.paragraphOrder),
 		R.indexOf(paragraphID)
 	)(doc);
+}
+
+// idForParagraphAtIndex :: (number, Doc) -> ParagraphID?
+function idForParagraphAtIndex(index, doc) {
+	return R.view(
+		R.compose(
+			lenses.paragraphOrder,
+			R.lensIndex(index)
+		),
+	)(doc);
+}
+
+// containsPosition :: (DocPosition, Doc) -> boolean
+function containsPosition(position, doc) {
+	const paragraphID =
+		idForParagraphAtIndex(position.paragraphIndex);
+
+	if (paragraphID == null) {
+		return false;
+	}
+
+	const paragraph =
+		R.view(lenses.paragraphForID(paragraphID))(doc);
+
+	if (position.offset < 0 || Paragraph.content(paragraph).length >= position.offset) {
+		return false;
+	}
+
+	return true;
+}
+
+// containsPointer :: (DocPointer, Doc) -> boolean
+function containsPointer(pointer, doc) {
+	const paragraph =
+		R.view(lenses.paragraphForID(pointer.paragraphID))(doc);
+
+	if (paragraph == null) {
+		return false;
+	}
+
+	if (position.offset < 0 || Paragraph.content(paragraph).length >= position.offset) {
+		return false;
+	}
+
+	return true;
+}
+
+// pointerFromPosition :: (DocPosition, Doc) -> DocPointer?
+// Returns null if the position is not inside the specified Doc.
+function pointerFromPosition(position, doc) {
+	if (!containsPosition(position, doc)) {
+		return null;
+	}
+
+	return DocPointer.make(
+		idForParagraphAtIndex(position.paragraphIndex),
+		position.offset);
+}
+
+// positionFromPointer :: (DocPointer, Doc) -> DocPosition?
+// Returns null if the pointer is not inside the specified Doc.
+function positionFromPointer(pointer, doc) {
+	if (!containsPointer(pointer, doc)) {
+		return null;
+	}
+
+	return DocPosition.make(
+		indexOfParagraph(pointer.paragraphForID, doc),
+		position.offset);
 }
 
 // insertParagraph :: (ParagraphID, number, Doc) -> Doc
