@@ -49,7 +49,7 @@ function containsPosition(position, doc) {
 	const paragraph =
 		R.view(lenses.paragraphForID(paragraphID))(doc);
 
-	if (position.offset < 0 || Paragraph.content(paragraph).length >= position.offset) {
+	if (position.offset < 0 || position.offset >= Paragraph.content(paragraph).length) {
 		return false;
 	}
 
@@ -65,7 +65,7 @@ function containsPointer(pointer, doc) {
 		return false;
 	}
 
-	if (position.offset < 0 || Paragraph.content(paragraph).length >= position.offset) {
+	if (pointer.offset < 0 || pointer.offset >= Paragraph.content(paragraph).length) {
 		return false;
 	}
 
