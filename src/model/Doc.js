@@ -134,25 +134,25 @@ function setParagraphContent(id, content, doc) {
 		doc);
 }
 
-// splitParagraph :: (DocPointer, Doc) -> Doc
-function splitParagraph(pointer, doc) {
-	const paragraphIndex = R.pipe(
-		R.view(lenses.paragraphOrder),
-		R.indexOf(pointer.paragraphID)
-	)(doc);
-
+// splitParagraph :: (DocPosition, Doc) -> Doc
+function splitParagraph(splitPosition, doc) {
 	const beforeSplitParagraphID = UUID();
 	const afterSplitParagraphID = UUID();
 
+	const paragraphIDContainingSplitPoint =
+		idForParagraphAtIndex(
+			splitPosition.paragraphIndex,
+			doc);
+
 	const { before, after } =
 		Paragraph.split(
-			pointer.offset,
-			R.view(lenses.paragraphForID(pointer.paragraphID), doc));
+			splitPosition.offset,
+			R.view(lenses.paragraphForID(paragraphIDContainingSplitPoint), doc));
 
 	return R.pipe(
 		d => insertPremadeParagraph(
 			beforeSplitParagraphID,
-			paragraphIndex,
+			splitPosition.paragraphIndex,
 			before,
 			d),
 		d => insertPremadeParagraph(
@@ -160,10 +160,12 @@ function splitParagraph(pointer, doc) {
 			// The original paragraph has shuffled up an index;
 			// to index past it, increment its original index once to 
 			// represent that shuffle, and once to move past it.
-			paragraphIndex + 2,
+			splitPosition.paragraphIndex + 2,
 			after,
 			d),
-		d => removeParagraph(pointer.paragraphID, d)
+		d => removeParagraph(
+			paragraphIDContainingSplitPoint,
+			d),
 	)(doc);
 }
 
@@ -216,20 +218,21 @@ function applyEdit(edit, doc) {
 	} else if (edit.type === Edit.types.replaceTextWithParagraphBreak) {
 		const pointerRange =
 			pointerRangeFromSelection(edit.selection, doc);
-		const newParagraphID =
-			UUID();
+		
+		// TODO: Offset to account for removal
+		const splitPosition =
+			positionFromPointer(pointerRange.end, doc);
 
 		return R.pipe(
-			d => splitParagraph(
-				pointerRange.end,
-				d),
+			// TODO: Remove selection
 			/*
-			d => insertParagraph(
-				newParagraphID,
-				indexOfParagraph(pointerRange.end.paragraphID, d) + 1,
+			d => removeText(
+				pointerRange,
 				d),
-			d => removeText(pointerRange, d),
 				*/
+			d => splitParagraph(
+				splitPosition,
+				d),
 		)(doc);
 	} else {
 		console.error("Unhandled edit type:", edit.type);
