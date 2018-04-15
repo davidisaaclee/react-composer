@@ -30,25 +30,34 @@ function setParagraphContent(id, content, doc) {
 		doc);
 }
 
-// replaceText :: (DocSelection, string, Doc) -> Doc
-function replaceText(selection, text, doc) {
-	const anchorRange =
-		anchorRangeFromSelection(selection, doc);
-
+// removeText :: (AnchorRange, Doc) -> Doc
+function removeText(range, doc) {
 	return R.over(
 		// TODO: Handle multiple paragraphs
-		lenses.paragraphForID(selection.anchor.paragraphID),
-		R.pipe(
-			p => Paragraph.insertText(text, anchorRange.end.offset, p),
-			p => Paragraph.removeText(anchorRange.start.offset, anchorRange.end.offset, p),
-		),
+		lenses.paragraphForID(range.start.paragraphID),
+		p => Paragraph.removeText(range.start.offset, range.end.offset, p),
 		doc);
 }
 
+// removeText :: (Anchor, string, Doc) -> Doc
+function insertText(anchor, text, doc) {
+	return R.over(
+		lenses.paragraphForID(anchor.paragraphID),
+		p => Paragraph.insertText(text, anchor.offset, p),
+		doc);
+}
+
+// applyEdit :: (Edit, Doc) -> Doc
 function applyEdit(edit, doc) {
 	switch (edit.type) {
 		case Edit.types.replaceText:
-			return replaceText(edit.selection, edit.text, doc);
+			const anchorRange =
+				anchorRangeFromSelection(edit.selection, doc);
+
+			return R.pipe(
+				d => insertText(anchorRange.end, edit.text, d),
+				d => removeText(anchorRange, d),
+			)(doc);
 	}
 }
 
