@@ -129,9 +129,13 @@ class RichText extends React.Component {
 
 	// rangeFromSelection :: DocSelection -> Range
 	rangeFromSelection(selection) {
-		// TODO: Should use start/end instead of anchor/focus
-		const start = this.nodeAndOffsetFromPosition(selection.anchor);
-		const end = this.nodeAndOffsetFromPosition(selection.focus);
+		const positionRange =
+			Doc.positionRangeFromSelection(selection, this.props.document);
+
+		const start =
+			this.nodeAndOffsetFromPosition(positionRange.start);
+		const end =
+			this.nodeAndOffsetFromPosition(positionRange.end);
 
 		const range = document.createRange();
 		range.setStart(start.node, start.offset);
