@@ -72,25 +72,15 @@ function containsPointer(pointer, doc) {
 	return true;
 }
 
-// pointerFromPosition :: (DocPosition, Doc) -> DocPointer?
-// Returns null if the position is not inside the specified Doc.
+// pointerFromPosition :: (DocPosition, Doc) -> DocPointer
 function pointerFromPosition(position, doc) {
-	if (!containsPosition(position, doc)) {
-		return null;
-	}
-
 	return DocPointer.make(
 		idForParagraphAtIndex(position.paragraphIndex, doc),
 		position.offset);
 }
 
-// positionFromPointer :: (DocPointer, Doc) -> DocPosition?
-// Returns null if the pointer is not inside the specified Doc.
+// positionFromPointer :: (DocPointer, Doc) -> DocPosition
 function positionFromPointer(pointer, doc) {
-	if (!containsPointer(pointer, doc)) {
-		return null;
-	}
-
 	return DocPosition.make(
 		indexOfParagraph(pointer.paragraphID, doc),
 		pointer.offset);
