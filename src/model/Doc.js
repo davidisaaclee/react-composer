@@ -12,12 +12,18 @@ const lenses = {
 	paragraphForID: id => R.compose(lenses.allParagraphs, R.lensProp(id)),
 };
 
+
+// -- Construction
+
 function make(paragraphOrder, allParagraphs) {
 	return { paragraphOrder, allParagraphs };
 }
 
 // empty :: Doc
 const empty = make([], {});
+
+
+// -- Accessors
 
 // indexOfParagraph :: (ParagraphID, Doc) -> number?
 function indexOfParagraph(paragraphID, doc) {
@@ -85,6 +91,35 @@ function positionFromPointer(pointer, doc) {
 		indexOfParagraph(pointer.paragraphID, doc),
 		pointer.offset);
 }
+
+// paragraphList :: Doc -> [{ id: ParagraphID, paragraph: Paragraph }]
+function paragraphList(doc) {
+	return R.pipe(
+		R.view(lenses.paragraphOrder),
+		R.map(id => ({ id, paragraph: R.view(lenses.paragraphForID(id), doc) }))
+	)(doc);
+}
+
+// sortPositionsAscending :: ([DocPointer], Doc) -> [DocPointer]
+// Sorts the specified pointers, with pointers closer to the beginning of
+// the doc occurring closer to the beginning of the sorted list.
+function sortPositionsAscending(pointers, doc) {
+	return R.sortWith([
+		R.ascend(pointer => doc.paragraphOrder.indexOf(pointer.paragraphID)),
+		R.ascend(pointer => pointer.offset)
+	], pointers);
+}
+
+// pointerRangeFromSelection :: (DocSelection, Doc) -> Range DocPointer
+function pointerRangeFromSelection(selection, doc) {
+	const [start, end] =
+		sortPositionsAscending([selection.anchor, selection.focus], doc);
+
+	return Range.make(start, end);
+}
+
+
+// -- Mutation
 
 // insertParagraph :: (ParagraphID, number, Doc) -> Doc
 // Inserts an empty paragraph at the specified index, shuffling
@@ -195,6 +230,7 @@ function insertText(pointer, text, doc) {
 		doc);
 }
 
+
 // applyEdit :: (Edit, Doc) -> Doc
 function applyEdit(edit, doc) {
 	if (edit.type === Edit.types.replaceText) {
@@ -228,32 +264,6 @@ function applyEdit(edit, doc) {
 		console.error("Unhandled edit type:", edit.type);
 		return doc;
 	}
-}
-
-// paragraphList :: Doc -> [{ id: ParagraphID, paragraph: Paragraph }]
-function paragraphList(doc) {
-	return R.pipe(
-		R.view(lenses.paragraphOrder),
-		R.map(id => ({ id, paragraph: R.view(lenses.paragraphForID(id), doc) }))
-	)(doc);
-}
-
-// sortPositionsAscending :: ([DocPointer], Doc) -> [DocPointer]
-// Sorts the specified pointers, with pointers closer to the beginning of
-// the doc occurring closer to the beginning of the sorted list.
-function sortPositionsAscending(pointers, doc) {
-	return R.sortWith([
-		R.ascend(pointer => doc.paragraphOrder.indexOf(pointer.paragraphID)),
-		R.ascend(pointer => pointer.offset)
-	], pointers);
-}
-
-// pointerRangeFromSelection :: (DocSelection, Doc) -> Range DocPointer
-function pointerRangeFromSelection(selection, doc) {
-	const [start, end] =
-		sortPositionsAscending([selection.anchor, selection.focus], doc);
-
-	return Range.make(start, end);
 }
 
 export {
