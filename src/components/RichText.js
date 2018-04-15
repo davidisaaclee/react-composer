@@ -124,6 +124,11 @@ class RichText extends React.Component {
 
 		// TODO: This assumes that all tagged paragraphs have a single text node as a child.
 		const textNode = node.firstChild;
+		if (textNode == null) {
+			// TODO: Uncertain what to do here.
+			// One case that leads here is an empty <p> node.
+			throw new Error(`No text node for paragraph ${pointer.paragraphID}`);
+		}
 
 		return { node: textNode, offset: pointer.offset };
 	}
