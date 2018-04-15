@@ -1,6 +1,6 @@
 import * as R from 'ramda';
 import * as Edit from './Edit';
-import * as DocPosition from './DocPosition';
+import * as DocPointer from './DocPointer';
 import * as Doc from './Doc';
 import * as DocSelection from './DocSelection';
 
@@ -16,22 +16,22 @@ const make = (selection) => ({
 function applyEdit(edit, prevDoc, nextDoc, editor) {
 	// TODO: `selection` can get out of sync with window selection (e.g. on focus).
 	if (edit.type === Edit.types.replaceText) {
-		const positionRange =
-			Doc.positionRangeFromSelection(edit.selection, prevDoc);
+		const pointerRange =
+			Doc.pointerRangeFromSelection(edit.selection, prevDoc);
 
 		return R.set(
 			lenses.selection,
 			DocSelection.makeCollapsed(
-				DocPosition.offsetBy(
+				DocPointer.offsetBy(
 					edit.text.length,
-					positionRange.start)),
+					pointerRange.start)),
 			editor);
 	} else if (edit.type === Edit.types.replaceTextWithParagraphBreak) {
-		const positionRange =
-			Doc.positionRangeFromSelection(edit.selection, prevDoc);
+		const pointerRange =
+			Doc.pointerRangeFromSelection(edit.selection, prevDoc);
 
 		const newParagraphIndex =
-			Doc.indexOfParagraph(positionRange.start.paragraphID, prevDoc) + 1;
+			Doc.indexOfParagraph(pointerRange.start.paragraphID, prevDoc) + 1;
 		const newParagraphID =
 			R.pipe(
 				R.view(Doc.lenses.paragraphOrder),
@@ -39,7 +39,7 @@ function applyEdit(edit, prevDoc, nextDoc, editor) {
 			)(nextDoc);
 
 		const cursorPosition =
-			DocPosition.make(newParagraphID, 0);
+			DocPointer.make(newParagraphID, 0);
 
 		return R.set(
 			lenses.selection,

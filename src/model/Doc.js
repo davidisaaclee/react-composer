@@ -63,11 +63,11 @@ function setParagraphContent(id, content, doc) {
 		doc);
 }
 
-// splitParagraph :: (DocPosition, Doc) -> Doc
-function splitParagraph(position, doc) {
+// splitParagraph :: (DocPointer, Doc) -> Doc
+function splitParagraph(pointer, doc) {
 	const paragraphIndex = R.pipe(
 		R.view(lenses.paragraphOrder),
-		R.indexOf(position.paragraphID)
+		R.indexOf(pointer.paragraphID)
 	)(doc);
 
 	const beforeSplitParagraphID = UUID();
@@ -75,8 +75,8 @@ function splitParagraph(position, doc) {
 
 	const { before, after } =
 		Paragraph.split(
-			position.offset,
-			R.view(lenses.paragraphForID(position.paragraphID), doc));
+			pointer.offset,
+			R.view(lenses.paragraphForID(pointer.paragraphID), doc));
 
 	return R.pipe(
 		d => insertPremadeParagraph(
@@ -92,7 +92,7 @@ function splitParagraph(position, doc) {
 			paragraphIndex + 2,
 			after,
 			d),
-		d => removeParagraph(position.paragraphID, d)
+		d => removeParagraph(pointer.paragraphID, d)
 	)(doc);
 }
 
@@ -124,40 +124,40 @@ function removeText(range, doc) {
 		doc);
 }
 
-// removeText :: (DocPosition, string, Doc) -> Doc
-function insertText(position, text, doc) {
+// removeText :: (DocPointer, string, Doc) -> Doc
+function insertText(pointer, text, doc) {
 	return R.over(
-		lenses.paragraphForID(position.paragraphID),
-		p => Paragraph.insertText(text, position.offset, p),
+		lenses.paragraphForID(pointer.paragraphID),
+		p => Paragraph.insertText(text, pointer.offset, p),
 		doc);
 }
 
 // applyEdit :: (Edit, Doc) -> Doc
 function applyEdit(edit, doc) {
 	if (edit.type === Edit.types.replaceText) {
-		const positionRange =
-			positionRangeFromSelection(edit.selection, doc);
+		const pointerRange =
+			pointerRangeFromSelection(edit.selection, doc);
 
 		return R.pipe(
-			d => insertText(positionRange.end, edit.text, d),
-			d => removeText(positionRange, d),
+			d => insertText(pointerRange.end, edit.text, d),
+			d => removeText(pointerRange, d),
 		)(doc);
 	} else if (edit.type === Edit.types.replaceTextWithParagraphBreak) {
-		const positionRange =
-			positionRangeFromSelection(edit.selection, doc);
+		const pointerRange =
+			pointerRangeFromSelection(edit.selection, doc);
 		const newParagraphID =
 			UUID();
 
 		return R.pipe(
 			d => splitParagraph(
-				positionRange.end,
+				pointerRange.end,
 				d),
 			/*
 			d => insertParagraph(
 				newParagraphID,
-				indexOfParagraph(positionRange.end.paragraphID, d) + 1,
+				indexOfParagraph(pointerRange.end.paragraphID, d) + 1,
 				d),
-			d => removeText(positionRange, d),
+			d => removeText(pointerRange, d),
 				*/
 		)(doc);
 	} else {
@@ -174,17 +174,17 @@ function paragraphList(doc) {
 	)(doc);
 }
 
-// sortPositionsAscending :: ([DocPosition], Doc) -> [DocPosition]
-// Sorts the specified positions, with positions closer to the beginning of
+// sortPositionsAscending :: ([DocPointer], Doc) -> [DocPointer]
+// Sorts the specified pointers, with pointers closer to the beginning of
 // the doc occurring closer to the beginning of the sorted list.
-function sortPositionsAscending(positions, doc) {
+function sortPositionsAscending(pointers, doc) {
 	return R.sortWith([
-		R.ascend(position => doc.paragraphOrder.indexOf(position.paragraphID)),
-		R.ascend(position => position.offset)
-	], positions);
+		R.ascend(pointer => doc.paragraphOrder.indexOf(pointer.paragraphID)),
+		R.ascend(pointer => pointer.offset)
+	], pointers);
 }
 
-function positionRangeFromSelection(selection, doc) {
+function pointerRangeFromSelection(selection, doc) {
 	const [start, end] =
 		sortPositionsAscending([selection.anchor, selection.focus], doc);
 
@@ -201,6 +201,6 @@ export {
 	applyEdit,
 	paragraphList,
 	sortPositionsAscending,
-	positionRangeFromSelection,
+	pointerRangeFromSelection,
 };
 

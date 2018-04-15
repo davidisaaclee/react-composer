@@ -3,7 +3,7 @@ import React from 'react';
 import * as Doc from '../model/Doc';
 import * as ParagraphUtils from '../model/Paragraph';
 import * as Edit from '../model/Edit';
-import * as DocPosition from '../model/DocPosition';
+import * as DocPointer from '../model/DocPointer';
 import * as DocSelection from '../model/DocSelection';
 import * as EditorCommand from './EditorCommand';
 
@@ -55,8 +55,8 @@ function docSelectionFromNativeSelection(selection) {
 	}
 
 	// TODO: There should be a defined mapping between `Selection`'s offsets and model offsets.
-	const anchor = DocPosition.make(anchorParagraphID, selection.anchorOffset);
-	const focus = DocPosition.make(focusParagraphID, selection.focusOffset);
+	const anchor = DocPointer.make(anchorParagraphID, selection.anchorOffset);
+	const focus = DocPointer.make(focusParagraphID, selection.focusOffset);
 	return DocSelection.make(anchor, focus);
 }
 
@@ -114,10 +114,10 @@ class RichText extends React.Component {
 		return this.editorContainerRef.querySelector(selectorForParagraphID);
 	}
 	
-	// nodeAndOffsetFromPosition :: (DocPosition) -> { node: Node, offset: number }?
-	// Returns the text node and offset within that node for the specified `DocPosition`.
-	nodeAndOffsetFromPosition(position) {
-		const node = this.queryParagraphNode(position.paragraphID);
+	// nodeAndOffsetFromPointer :: (DocPointer) -> { node: Node, offset: number }?
+	// Returns the text node and offset within that node for the specified `DocPointer`.
+	nodeAndOffsetFromPointer(pointer) {
+		const node = this.queryParagraphNode(pointer.paragraphID);
 		if (node == null) {
 			return null;
 		}
@@ -125,18 +125,18 @@ class RichText extends React.Component {
 		// TODO: This assumes that all tagged paragraphs have a single text node as a child.
 		const textNode = node.firstChild;
 
-		return { node: textNode, offset: position.offset };
+		return { node: textNode, offset: pointer.offset };
 	}
 
 	// rangeFromSelection :: DocSelection -> Range
 	rangeFromSelection(selection) {
-		const positionRange =
-			Doc.positionRangeFromSelection(selection, this.props.document);
+		const pointerRange =
+			Doc.pointerRangeFromSelection(selection, this.props.document);
 
 		const start =
-			this.nodeAndOffsetFromPosition(positionRange.start);
+			this.nodeAndOffsetFromPointer(pointerRange.start);
 		const end =
-			this.nodeAndOffsetFromPosition(positionRange.end);
+			this.nodeAndOffsetFromPointer(pointerRange.end);
 
 		const range = document.createRange();
 		range.setStart(start.node, start.offset);
