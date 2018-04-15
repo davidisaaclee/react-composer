@@ -179,6 +179,9 @@ class RichText extends React.Component {
 		}
 	}
 
+	// renderSelection :: DocSelection? -> ()
+	// Sets the browser's selection range to the specified document selection.
+	// If a null selection is provided, clears the browser selection range.
 	renderSelection(selection) {
 		const windowSelection = getSelection();
 		windowSelection.removeAllRanges();
