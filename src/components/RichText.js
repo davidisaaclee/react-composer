@@ -17,6 +17,9 @@ const errorMessages = {
 	queryingForParagraphBeforeReceivedRef: `Attempted to calculate DOM node and offset before receiving ref.`,
 };
 
+
+// -- Helper functions
+
 // ancestorParagraphIDForNode :: Node? -> ParagraphID?
 function ancestorParagraphIDForNode(node) {
 	if (node == null) {
@@ -56,6 +59,14 @@ function docSelectionFromNativeSelection(selection) {
 	return DocSelection.make(anchor, focus);
 }
 
+function getSelection() {
+	// TODO: Cross-browser support
+	return window.getSelection();
+}
+
+
+// -- Helper components
+
 // Renders a paragraph as a <p> node with a data- attribute containing the paragraph ID.
 const Paragraph = ({ paragraph, id, ...restProps }) => (
 	<p
@@ -74,12 +85,8 @@ const EditorContainer = ({ editable = false, innerRef, ...restProps }) => (
 	/>
 );
 
-function getSelection() {
-	// TODO: Cross-browser support
-	return window.getSelection();
-}
 
-
+// -- 
 
 // document :: Doc
 // selection :: DocSelection?
@@ -179,3 +186,4 @@ class RichText extends React.Component {
 }
 
 export default RichText;
+
