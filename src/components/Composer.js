@@ -203,6 +203,7 @@ class Composer extends React.Component {
 
 		return (
 			<EditorContainer
+				suppressContentEditableWarning
 				innerRef={elm => this.editorContainerRef = elm}
 				editable
 				onKeyPress={this.handleKeyPress}
