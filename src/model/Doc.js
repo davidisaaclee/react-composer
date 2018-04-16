@@ -323,17 +323,13 @@ function applyEdit(edit, doc) {
 		const pointerRange =
 			pointerRangeFromSelection(edit.selection, doc);
 		
-		// TODO: Offset to account for removal
 		const splitPosition =
-			positionFromPointer(pointerRange.end, doc);
+			positionFromPointer(pointerRange.start, doc);
 
 		return R.pipe(
-			// TODO: Remove selection
-			/*
 			d => removeText(
 				pointerRange,
 				d),
-				*/
 			d => splitParagraph(
 				splitPosition,
 				d),
