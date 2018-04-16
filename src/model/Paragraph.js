@@ -13,39 +13,37 @@ const lenses = {
 const make = contents => ({ contents });
 
 // empty :: Paragraph
-const empty = make(['']);
+const empty = make([]);
 
 // contents :: Paragraph -> [Content]
 const contents = R.view(lenses.contents);
 
-// TODO: Operate on Content instead of strings
-
-// insertText :: (string, number, Paragraph) -> Paragraph
-function insertText(text, offset, paragraph) {
+// insertContent :: (Content, number, Paragraph) -> Paragraph
+function insertContent(content, offset, paragraph) {
 	return R.pipe(
 		R.over(
 			lenses.contents,
 			contents => [
 				...sliceContents(0, offset, contents),
-				plainTextContent(text),
+				content,
 				...sliceContents(offset, null, contents)
 			]),
 		defragment
 	)(paragraph);
 }
 
-// appendText :: (string, Paragraph) -> Paragraph
-function appendText(text, paragraph) {
-	return insertText(
-		text,
+// appendContent :: (Content, Paragraph) -> Paragraph
+function appendContent(content, paragraph) {
+	return insertContent(
+		content,
 		contentsCharacterCount(contents(paragraph)),
 		paragraph);
 }
 
-// removeText :: (number, number, Paragraph) -> Paragraph
-// Removes text between the two specified offsets.
-//     removeText(1, 3, make(['abcdef'])) => make(['bc'])
-function removeText(startOffset, endOffset, paragraph) {
+// removeContentInRange :: (number, number, Paragraph) -> Paragraph
+// Removes content between the two specified offsets.
+//     removeContentInRange(1, 3, make(['abcdef'])) => make(['bc'])
+function removeContentInRange(startOffset, endOffset, paragraph) {
 	return R.pipe(
 		R.over(
 			lenses.contents,
@@ -67,9 +65,7 @@ const split = (offset, paragraph) => ({
 function merge(p1, p2) {
 	return R.pipe(
 		contents,
-		// TODO: Pass the original content
-		R.map(R.prop('text')),
-		R.reduce((acc, text) => appendText(text, acc), p1),
+		R.reduce((acc, content) => appendContent(content, acc), p1),
 	)(p2);
 }
 
@@ -163,12 +159,13 @@ export {
 	make,
 	empty,
 	contents,
-	insertText,
-	appendText,
-	removeText,
+	insertContent,
+	appendContent,
+	removeContentInRange,
 	split,
 	merge,
 	defragment,
 	characterCount,
+	plainTextContent,
 };
 

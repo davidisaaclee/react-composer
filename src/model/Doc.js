@@ -266,7 +266,7 @@ function removeText(range, doc) {
 		// If the range stays within one paragraph, just edit the paragraph.
 		return R.over(
 			lenses.paragraphForID(range.start.paragraphID),
-			p => Paragraph.removeText(range.start.offset, range.end.offset, p),
+			p => Paragraph.removeContentInRange(range.start.offset, range.end.offset, p),
 			doc);
 	} else {
 		// Gather the partial paragraphs to remove...
@@ -305,7 +305,7 @@ function removeText(range, doc) {
 function insertText(pointer, text, doc) {
 	return R.over(
 		lenses.paragraphForID(pointer.paragraphID),
-		p => Paragraph.insertText(text, pointer.offset, p),
+		p => Paragraph.insertContent(Paragraph.plainTextContent(text), pointer.offset, p),
 		doc);
 }
 

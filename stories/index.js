@@ -6,12 +6,13 @@ import { storiesOf } from '@storybook/react';
 import { withState } from '@dump247/storybook-state';
 import UUID from 'uuid';
 import Composer, { Doc, Editor } from '../src';
+import { plainTextContent } from '../src/model/Paragraph';
 import * as sampleText from './sampleText';
 
 const initialDocument =
 	sampleText.alice.reduce((doc, text, idx) => R.pipe(
 		d => Doc.appendParagraph(`p${idx}`, d),
-		d => Doc.setParagraphContents(`p${idx}`, [{ text }], d),
+		d => Doc.setParagraphContents(`p${idx}`, [plainTextContent(text)], d),
 	)(doc), Doc.empty);
 
 const initialEditor = Editor.make(null);
