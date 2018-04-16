@@ -15,21 +15,21 @@ let docState = Doc.empty;
 let editorState = Editor.make(null);
 
 <Composer
-	document={docState}
-	selection={editorState.selection}
-	onEdit={edit => {
-		let newDocState = Doc.applyEdit(edit, docState);
-		let newEditorState = Editor.applyEdit(
-			edit,
-			docState,
-			newDocState,
-			editorState);
+  document={docState}
+  selection={editorState.selection}
+  onEdit={edit => {
+    let newDocState = Doc.applyEdit(edit, docState);
+    let newEditorState = Editor.applyEdit(
+      edit,
+      docState,
+      newDocState,
+      editorState);
 
-		docState = newDocState;
-		editorState = newEditorState;
+    docState = newDocState;
+    editorState = newEditorState;
 
-		rerender();
-	}}
+    rerender();
+  }}
 />
 ```
 
