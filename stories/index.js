@@ -10,12 +10,11 @@ import * as Doc from '../src/model/Doc';
 import * as Editor from '../src/model/Editor';
 import * as sampleText from './sampleText';
 
-const initialDocument = R.pipe(
-	d => Doc.appendParagraph('p1', d),
-	d => Doc.appendParagraph('p2', d),
-	d => Doc.setParagraphContent('p1', sampleText.alice[0], d),
-	d => Doc.setParagraphContent('p2', sampleText.alice[1], d),
-)(Doc.empty);
+const initialDocument =
+	sampleText.alice.reduce((doc, text, idx) => R.pipe(
+		d => Doc.appendParagraph(`p${idx}`, d),
+		d => Doc.setParagraphContent(`p${idx}`, text, d),
+	)(doc), Doc.empty);
 
 const initialEditor = Editor.make(null);
 
