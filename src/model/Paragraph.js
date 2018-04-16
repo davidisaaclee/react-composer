@@ -1,6 +1,8 @@
 import * as R from 'ramda';
 
-// Content ::= string
+// Content ::= { text: string }
+
+const plainTextContent = text => ({ text });
 
 const lenses = {
 	// contents :: Lens Paragraph [Content]
@@ -25,7 +27,7 @@ function insertText(text, offset, paragraph) {
 			lenses.contents,
 			contents => [
 				...sliceContents(0, offset, contents),
-				text,
+				plainTextContent(text),
 				...sliceContents(offset, null, contents)
 			]),
 		defragment
@@ -62,7 +64,14 @@ const split = (offset, paragraph) => ({
 });
 
 // merge :: (Paragraph, Paragraph) -> Paragraph
-const merge = (p1, p2) => appendText(contents(p2), p1);
+function merge(p1, p2) {
+	return R.pipe(
+		contents,
+		// TODO: Pass the original content
+		R.map(R.prop('text')),
+		R.reduce((acc, text) => appendText(text, acc), p1),
+	)(p2);
+}
 
 // defragment :: (Paragraph) -> Paragraph
 // Collapses contents if doing so would not affect rendering.
@@ -112,17 +121,17 @@ function sliceContents(startOffset, endOffset, contents) {
 		const content = contents[i];
 
 		let contentToInclude = '';
-		for (let charIdx = 0; charIdx < content.length; charIdx++) {
+		for (let charIdx = 0; charIdx < content.text.length; charIdx++) {
 			// The offset will be one greater than the character index, since
 			// the offset represents the space between characters.
 			currentOffset++;
 
 			if (isInSlice(currentOffset)) {
-				contentToInclude += content.charAt(charIdx);
+				contentToInclude += content.text.charAt(charIdx);
 			}
 		}
 
-		retval.push(contentToInclude);
+		retval.push(plainTextContent(contentToInclude));
 
 		if (currentOffset >= endOffset) {
 			break;
@@ -137,14 +146,16 @@ function sliceContents(startOffset, endOffset, contents) {
 function collapseContentsIfPossible(contents) {
 	// Since we only have plain text, content can always collapsed.
 	return R.pipe(
+		R.map(R.prop('text')),
 		R.join(''),
+		plainTextContent,
 		x => [x],
 	)(contents);
 }
 
 // contentsCharacterCount :: [Content] -> number
 function contentsCharacterCount(contents) {
-	return R.sum(R.map(R.length, contents));
+	return R.sum(R.map(R.pipe(R.prop('text'), R.length), contents));
 }
 
 
