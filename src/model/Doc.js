@@ -160,7 +160,9 @@ function appendParagraph(id, doc) {
 function setParagraphContents(id, contents, doc) {
 	return R.over(
 		lenses.paragraphForID(id),
-		paragraph => Paragraph.make(contents),
+		paragraph => contents.reduce(
+			(paragraph, content) => Paragraph.appendContent(content, paragraph),
+			paragraph),
 		doc);
 }
 

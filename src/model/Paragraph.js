@@ -156,7 +156,6 @@ function contentsCharacterCount(contents) {
 
 
 export {
-	make,
 	empty,
 	contents,
 	insertContent,
