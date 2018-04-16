@@ -74,8 +74,14 @@ const Paragraph = ({ paragraph, id, ...restProps }) => (
 		{...{ [k.paragraphIDAttributeKey]: id }}
 		{...restProps}
 	>
-		{ParagraphUtils.content(paragraph)}
+		<ParagraphContent>
+			{ParagraphUtils.content(paragraph)}
+		</ParagraphContent>
 	</p>
+);
+
+const ParagraphContent = ({ children, ...restProps }) => (
+	children
 );
 
 const EditorContainer = ({ editable = false, innerRef, ...restProps }) => (
