@@ -5,9 +5,7 @@ import { action } from '@storybook/addon-actions';
 import { storiesOf } from '@storybook/react';
 import { withState } from '@dump247/storybook-state';
 import UUID from 'uuid';
-import Composer from '../src';
-import * as Doc from '../src/model/Doc';
-import * as Editor from '../src/model/Editor';
+import Composer, { Doc, Editor } from '../src';
 import * as sampleText from './sampleText';
 
 const initialDocument =
