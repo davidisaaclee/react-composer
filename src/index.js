@@ -1,4 +1,4 @@
-import RichText from './components/RichText';
+import Composer from './components/Composer';
 
-export default RichText;
+export default Composer;
 

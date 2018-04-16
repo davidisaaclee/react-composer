@@ -5,7 +5,7 @@ import { action } from '@storybook/addon-actions';
 import { storiesOf } from '@storybook/react';
 import { withState } from '@dump247/storybook-state';
 import UUID from 'uuid';
-import RichText from '../src';
+import Composer from '../src';
 import * as Doc from '../src/model/Doc';
 import * as Editor from '../src/model/Editor';
 import * as sampleText from './sampleText';
@@ -18,9 +18,9 @@ const initialDocument =
 
 const initialEditor = Editor.make(null);
 
-storiesOf('RichText', module)
+storiesOf('Composer', module)
   .add('basic', withState({ doc: initialDocument, editor: initialEditor }, (store) => (
-		<RichText
+		<Composer
 			document={store.state.doc}
 			selection={store.state.editor.selection}
 			onEdit={edit => {

@@ -91,8 +91,8 @@ const EditorContainer = ({ editable = false, innerRef, ...restProps }) => (
 
 // document :: Doc
 // selection :: DocSelection?
-// onEdit :: RichText.Edit -> ()
-class RichText extends React.Component {
+// onEdit :: Edit -> ()
+class Composer extends React.Component {
 	constructor(props) {
 		super(props);
 
@@ -220,5 +220,5 @@ class RichText extends React.Component {
 	}
 }
 
-export default RichText;
+export default Composer;
 

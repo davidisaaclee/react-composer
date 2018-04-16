@@ -1,5 +1,5 @@
 {
-	"name": "@davidisaaclee/react-rich-text",
+	"name": "@davidisaaclee/react-composer",
 	"version": "0.1.0",
 	"main": "./lib/index.js",
 	"module": "./es/index.js",
