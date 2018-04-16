@@ -57,7 +57,7 @@ function containsPosition(position, doc) {
 	const paragraph =
 		R.view(lenses.paragraphForID(paragraphID))(doc);
 
-	if (position.offset < 0 || position.offset > Paragraph.content(paragraph).length) {
+	if (position.offset < 0 || position.offset > Paragraph.characterCount(paragraph)) {
 		return false;
 	}
 
@@ -75,7 +75,7 @@ function containsPointer(pointer, doc) {
 		return false;
 	}
 
-	if (pointer.offset < 0 || pointer.offset > Paragraph.content(paragraph).length) {
+	if (pointer.offset < 0 || pointer.offset > Paragraph.characterCount(paragraph)) {
 		return false;
 	}
 
@@ -156,10 +156,11 @@ function appendParagraph(id, doc) {
 		doc);
 }
 
-function setParagraphContent(id, content, doc) {
+// setParagraphContents :: (ParagraphID, [Paragraph.Content], Doc) -> Doc
+function setParagraphContents(id, contents, doc) {
 	return R.over(
 		lenses.paragraphForID(id),
-		paragraph => content,
+		paragraph => Paragraph.make(contents),
 		doc);
 }
 
@@ -300,7 +301,7 @@ function removeText(range, doc) {
 	}
 }
 
-// removeText :: (DocPointer, string, Doc) -> Doc
+// insertText :: (DocPointer, string, Doc) -> Doc
 function insertText(pointer, text, doc) {
 	return R.over(
 		lenses.paragraphForID(pointer.paragraphID),
@@ -355,8 +356,7 @@ function pointerRangeToEndOfParagraphFrom(startPointer, doc) {
 	const endOffset =
 		R.pipe(
 			R.view(lenses.paragraphForID(startPointer.paragraphID)),
-			Paragraph.content,
-			R.length
+			Paragraph.characterCount
 		)(doc);
 	const endPointer =
 		DocPointer.make(startPointer.paragraphID, endOffset);
@@ -389,7 +389,7 @@ export {
 	empty,
 	indexOfParagraph,
 	appendParagraph,
-	setParagraphContent,
+	setParagraphContents,
 	applyEdit,
 	paragraphList,
 	sortPositionsAscending,

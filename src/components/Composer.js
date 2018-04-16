@@ -75,7 +75,11 @@ const Paragraph = ({ paragraph, id, ...restProps }) => (
 		{...restProps}
 	>
 		<ParagraphContent>
-			{ParagraphUtils.content(paragraph)}
+			{ParagraphUtils.contents(paragraph).map(content => (
+				<ParagraphContent>
+					{content}
+				</ParagraphContent>
+			))}
 		</ParagraphContent>
 	</p>
 );

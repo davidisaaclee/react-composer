@@ -3,47 +3,161 @@ import * as R from 'ramda';
 // Content ::= string
 
 const lenses = {
-	content: R.identity,
+	// contents :: Lens Paragraph [Content]
+	contents: R.lensProp('contents'),
 };
 
-const make = content => content;
-const empty = make('');
+// make :: [Content] -> Paragraph
+const make = contents => ({ contents });
 
-// content :: Paragraph -> Content
-const content = R.view(lenses.content);
+// empty :: Paragraph
+const empty = make(['']);
 
-const insertText = (text, offset, paragraph) =>
-	R.over(
-		lenses.content,
-		content => content.slice(0, offset) + text + content.slice(offset)
+// contents :: Paragraph -> [Content]
+const contents = R.view(lenses.contents);
+
+// TODO: Operate on Content instead of strings
+
+// insertText :: (string, number, Paragraph) -> Paragraph
+function insertText(text, offset, paragraph) {
+	return R.pipe(
+		R.over(
+			lenses.contents,
+			contents => [
+				...sliceContents(0, offset, contents),
+				text,
+				...sliceContents(offset, null, contents)
+			]),
+		defragment
 	)(paragraph);
+}
 
-const appendText = (text, paragraph) =>
-	insertText(text, content(paragraph).length, paragraph);
+// appendText :: (string, Paragraph) -> Paragraph
+function appendText(text, paragraph) {
+	return insertText(
+		text,
+		contentsCharacterCount(contents(paragraph)),
+		paragraph);
+}
 
-const removeText = (startOffset, endOffset, paragraph) =>
-	R.over(
-		lenses.content,
-		content => content.slice(0, startOffset) + content.slice(endOffset)
+// removeText :: (number, number, Paragraph) -> Paragraph
+// Removes text between the two specified offsets.
+//     removeText(1, 3, make(['abcdef'])) => make(['bc'])
+function removeText(startOffset, endOffset, paragraph) {
+	return R.pipe(
+		R.over(
+			lenses.contents,
+			contents => [
+				...sliceContents(0, startOffset, contents),
+				...sliceContents(endOffset, null, contents)
+			]),
+		defragment
 	)(paragraph);
+}
 
 // split :: (number, Paragraph) -> { before: Paragraph, after: Paragraph }
 const split = (offset, paragraph) => ({
-	before: make(content(paragraph).slice(0, offset)),
-	after: make(content(paragraph).slice(offset)),
+	before: defragment(make(sliceContents(0, offset, contents(paragraph)))),
+	after: defragment(make(sliceContents(offset, contents(paragraph)))),
 });
 
 // merge :: (Paragraph, Paragraph) -> Paragraph
-const merge = (p1, p2) => appendText(content(p2), p1);
+const merge = (p1, p2) => appendText(contents(p2), p1);
+
+// defragment :: (Paragraph) -> Paragraph
+// Collapses contents if doing so would not affect rendering.
+function defragment(paragraph) {
+	return R.over(
+		lenses.contents,
+		collapseContentsIfPossible,
+		paragraph);
+}
+
+// characterCount :: (Paragraph) -> number
+function characterCount(paragraph) {
+	return R.pipe(
+		R.view(lenses.contents),
+		contentsCharacterCount
+	)(paragraph);
+}
+
+
+// -- Helpers
+
+// sliceContents :: (number, number?, [Content]) -> [Content]
+// Copies a slice of a content list between two offsets into a new content list.
+// If the end offset is omitted, slices to end of content list.
+//     sliceContents(0, 1, ['abc']) => ['a']
+//     sliceContents(0, 3, ['abc']) => ['abc']
+//     sliceContents(1, 5, ['ab', 'c', 'def']) => ['b', 'c', 'de']
+//     sliceContents(1, null, ['ab', 'c', 'def']) => ['b', 'c', 'def']
+//     sliceContents(0, 99, ['abc']) => ['abc']
+//     sliceContents(0, 0, ['abc']) => []
+//     sliceContents(1, 0, ['abc']) => []
+function sliceContents(startOffset, endOffset, contents) {
+	endOffset =
+		endOffset == null ? contentsCharacterCount(contents) : endOffset;
+
+	if (endOffset <= startOffset) {
+		return [];
+	}
+
+	const isInSlice =
+		offset => offset > startOffset && offset <= endOffset;
+
+	let retval = [];
+
+	let currentOffset = 0;
+	for (let i = 0; i < contents.length; i++) {
+		const content = contents[i];
+
+		let contentToInclude = '';
+		for (let charIdx = 0; charIdx < content.length; charIdx++) {
+			// The offset will be one greater than the character index, since
+			// the offset represents the space between characters.
+			currentOffset++;
+
+			if (isInSlice(currentOffset)) {
+				contentToInclude += content.charAt(charIdx);
+			}
+		}
+
+		retval.push(contentToInclude);
+
+		if (currentOffset >= endOffset) {
+			break;
+		}
+	}
+
+	return retval;
+}
+
+// collapseContentsIfPossible :: [Content] -> [Content]
+// Collapses adjacent contents if doing so does not change rendering.
+function collapseContentsIfPossible(contents) {
+	// Since we only have plain text, content can always collapsed.
+	return R.pipe(
+		R.join(''),
+		x => [x],
+	)(contents);
+}
+
+// contentsCharacterCount :: [Content] -> number
+function contentsCharacterCount(contents) {
+	return R.sum(R.map(R.length, contents));
+}
+
 
 export {
 	make,
 	empty,
-	content,
+	contents,
 	insertText,
 	appendText,
 	removeText,
 	split,
 	merge,
+	defragment,
+	characterCount,
 };
 
