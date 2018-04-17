@@ -8,7 +8,7 @@ const Paragraph = OSD({
 	count: content => content.text.length,
 	containsIndex: (index, content) => index > 0 && index <= content.text.length,
 	slice: Content.slice,
-	merge: (c1, c2) => Content.plainText(c1.text + c2.text),
+	removeSlice: Content.removeInRange
 });
 
 const generateKey = () => UUID();

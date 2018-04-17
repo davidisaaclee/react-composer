@@ -19,7 +19,10 @@ const Doc = OSD({
 		Content.plainText(Paragraph.toValuesList(p)[0].text.slice(start, end)),
 		Paragraph.empty),
 
-	merge: R.pipe(Paragraph.merge, Paragraph.defragment),
+	removeSlice: (startOffset, endOffset, paragraph) => Paragraph.removeSlice(
+		Paragraph.positionFromAbsoluteOffset(startOffset, paragraph),
+		Paragraph.positionFromAbsoluteOffset(endOffset, paragraph),
+		paragraph),
 });
 
 

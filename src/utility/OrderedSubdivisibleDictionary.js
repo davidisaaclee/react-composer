@@ -13,7 +13,7 @@ OrderedSubdivisbleDictionary k v ::= OrderedDictionary k v
 	  count: v -> number,
 		containsIndex: (number, v) -> boolean,
 	  slice: (number, number, v) -> v,
-	  merge: (v, v) -> v
+    removeSlice: (number, number, v) -> v
 	}
 */
 
@@ -27,8 +27,8 @@ export default ({
 	// slice :: (number, number, v) -> v
 	slice: elementSlice,
 
-	// merge :: (v, v) -> v
-	merge: elementMerge
+	// removeSlice :: (number, number, v) -> v
+	removeSlice: elementRemoveSlice,
 }) => {
 
 	// Position ::= { index: number, offset: number };
@@ -161,20 +161,12 @@ export default ({
 		const endPositionKey =
 			OD.keyAtIndex(endPosition.index, dict);
 
-		const before =
-			elementSlice(
-				0,
-				startPosition.offset,
-				OD.get(startPositionKey, dict));
-		const after =
-			elementSlice(
-				endPosition.offset,
-				elementCount(OD.get(endPositionKey, dict)),
-				OD.get(endPositionKey, dict));
-
 		if (startPositionKey === endPositionKey) {
-			const merged =
-				elementMerge(before, after);
+			const elementAfterRemovingSlice =
+				elementRemoveSlice(
+					startPosition.offset,
+					endPosition.offset,
+					OD.get(startPositionKey, dict));
 
 			return R.pipe(
 				// Remove all full elements within the slice.
@@ -184,11 +176,26 @@ export default ({
 					R.map(
 						index => OD.keyAtIndex(index, dict),
 						R.range(startPosition.index + 1, endPosition.index))),
+				// Remove the original element.
 				OD.remove(startPositionKey),
-				OD.remove(endPositionKey),
-				OD.insert(startPositionKey, merged, startPosition.index),
+				// Insert a copy of the element after removing the slice.
+				OD.insert(
+					startPositionKey,
+					elementAfterRemovingSlice,
+					startPosition.index),
 			)(dict);
 		} else {
+			const before =
+				elementSlice(
+					0,
+					startPosition.offset,
+					OD.get(startPositionKey, dict));
+			const after =
+				elementSlice(
+					endPosition.offset,
+					elementCount(OD.get(endPositionKey, dict)),
+					OD.get(endPositionKey, dict));
+
 			return R.pipe(
 				// Remove all full elements within the slice.
 				d => R.reduce(
