@@ -11,8 +11,13 @@ import * as sampleText from './sampleText';
 
 const initialDocument =
 	sampleText.alice.reduce((doc, text, idx) => R.pipe(
-		d => Doc.appendParagraph(`p${idx}`, d),
-		d => Doc.setParagraphContents(`p${idx}`, [Paragraph.plainTextContent(text)], d),
+		Doc.push(`p${idx}`, Paragraph.empty),
+		Doc.set(
+			`p${idx}`,
+			Paragraph.fromArray([{
+				key: UUID(),
+				value: Paragraph.plainTextContent(text)
+			}])),
 	)(doc), Doc.empty);
 
 const initialEditor = Editor.make(null);

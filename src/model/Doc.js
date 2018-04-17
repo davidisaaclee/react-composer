@@ -24,17 +24,6 @@ const ParagraphDict = OSD({
 const make = (order, all) => ParagraphDict.fromArray(order.map(k => all[k]));
 const empty = make([], {});
 
-const indexOfParagraph =
-	ParagraphDict.indexOf;
-
-const appendParagraph = (paragraph, doc) => 
-	ParagraphDict.push(paragraph, Paragraph.empty, doc);
-
-// setParagraphContents :: (ParagraphID, [Paragraph.Content], Doc) -> Doc
-const setParagraphContents = (paragraphID, contents, doc) => ParagraphDict.update(
-	paragraphID,
-	paragraph => Paragraph.make(contents),
-	doc);
 
 // pointerRangeFromSelection :: (DocSelection, Doc) -> Range OSD.Position
 function pointerRangeFromSelection(selection, doc) {
@@ -100,9 +89,6 @@ function applyEdit(edit, doc) {
 
 export default {
 	...ParagraphDict,
-	indexOfParagraph,
-	appendParagraph,
-	setParagraphContents,
 	applyEdit,
 	pointerRangeFromSelection,
 };

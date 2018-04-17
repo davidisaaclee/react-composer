@@ -40,7 +40,7 @@ function applyEdit(edit, prevDoc, nextDoc, editor) {
 			Doc.pointerRangeFromSelection(edit.selection, prevDoc);
 
 		const newParagraphIndex =
-			Doc.indexOfParagraph(pointerRange.start.paragraphID, prevDoc) + 1;
+			Doc.indexOf(pointerRange.start.paragraphID, prevDoc) + 1;
 		const newParagraphID =
 			Doc.keyAtIndex(newParagraphIndex, nextDoc);
 
