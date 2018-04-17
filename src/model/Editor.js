@@ -1,8 +1,8 @@
 import * as R from 'ramda';
-import * as Edit from './Edit';
-import * as DocPointer from './DocPointer';
-import Doc from './Doc';
-import * as DocSelection from './DocSelection';
+import * as Edit from 'model/Edit';
+import * as DocPointer from 'model/DocPointer';
+import Doc from 'model/Doc';
+import * as DocSelection from 'model/DocSelection';
 
 const lenses = {
 	selection: R.lensProp('selection')

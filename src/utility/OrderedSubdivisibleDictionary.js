@@ -1,5 +1,5 @@
 import * as R from 'ramda';
-import * as OD from './OrderedDictionary';
+import * as OD from 'utility/OrderedDictionary';
 
 /*
 `OrderedSubdivisbleDictionary` is a specialization of `OrderedDictionary`,

@@ -1,10 +1,10 @@
 import * as R from 'ramda';
 import UUID from 'uuid';
-import Paragraph from './Paragraph';
-import * as Edit from './Edit';
-import * as Range from './Range';
+import Paragraph from 'model/Paragraph';
+import * as Edit from 'model/Edit';
+import * as Range from 'model/Range';
 
-import OSD from '../utility/OrderedSubdivisibleDictionary';
+import OSD from 'utility/OrderedSubdivisibleDictionary';
 
 // Doc ::= OrderedSubdivisibleDictionary ParagraphID Paragraph
 const Doc = OSD({

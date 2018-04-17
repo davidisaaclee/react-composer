@@ -1,6 +1,6 @@
 import * as R from 'ramda';
 import UUID from 'uuid';
-import OSD from '../utility/OrderedSubdivisibleDictionary';
+import OSD from 'utility/OrderedSubdivisibleDictionary';
 
 // Paragraph ::= OrderedSubdivisibleDictionary ContentID Content
 const Paragraph = OSD({

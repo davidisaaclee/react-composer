@@ -1,10 +1,10 @@
 import React from 'react';
 
-import Doc from '../model/Doc';
-import ParagraphUtils from '../model/Paragraph';
-import * as Edit from '../model/Edit';
-import * as DocPointer from '../model/DocPointer';
-import * as DocSelection from '../model/DocSelection';
+import Doc from 'model/Doc';
+import ParagraphUtils from 'model/Paragraph';
+import * as Edit from 'model/Edit';
+import * as DocPointer from 'model/DocPointer';
+import * as DocSelection from 'model/DocSelection';
 import * as EditorCommand from './EditorCommand';
 
 const k = {
