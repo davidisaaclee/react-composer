@@ -33,7 +33,7 @@ export default ({
 
 	// Position ::= { index: number, offset: number };
 	// Pointer ::= { key: k, offset: number };
-
+	
 	// makePosition :: (number, number) -> Position
 	const makePosition = (index, offset) => ({ index, offset });
 
@@ -59,13 +59,39 @@ export default ({
 	const pointerFromPosition = R.curry(_pointerFromPosition);
 
 
+	// positionFromAbsoluteOffset :: (number, OSD) -> Position?
+	// Returns a Position representing the specified subelement offset from
+	// the beginning of the dictionary.
+	// If the offset is not within the dictionary, returns null.
+	function positionFromAbsoluteOffset(absoluteOffset, dict) {
+		if (absoluteOffset < 0) {
+			return null;
+		}
+
+		let currentOffset = 0;
+		for (let i = 0; i < dict.order.length; i++) {
+			const currentKey = dict.order[i];
+			const currentElementCount = elementCount(OD.get(currentKey, dict));
+
+			if (currentOffset + currentElementCount < absoluteOffset) {
+				currentOffset += currentElementCount;
+				continue;
+			} else {
+				return makePosition(i, absoluteOffset - currentOffset);
+			}
+		}
+
+		return null;
+	}
+
+
 	// containsPosition :: (Position, OSD) -> boolean
 	function _containsPosition(position, dict) {
 		if (position.index == null) {
 			return false;
 		}
 
-		const key = OD.keyAtIndex(position.index);
+		const key = OD.keyAtIndex(position.index, dict);
 		if (key == null) {
 			return false;
 		}
@@ -109,15 +135,15 @@ export default ({
 		return R.pipe(
 			OD.remove(splitKey),
 			// TODO: insert needs 4 args
-			OD.insert(beforeKey, splitPosition.index),
-			OD.insert(afterKey, splitPosition.index + 1),
+			OD.insert(beforeKey, before, splitPosition.index),
+			OD.insert(afterKey, after, splitPosition.index + 1),
 		)(dict);
 	}
 	const splitElement = R.curry(_splitElement);
 
 
-	// removeSlice :: (Position, Position, k, k, OSD k v) -> OSD k v
-	function _removeSlice(startPosition, endPosition, beforeKey, afterKey, dict) {
+	// removeSlice :: (Position, Position, OSD k v) -> OSD k v
+	function _removeSlice(startPosition, endPosition, dict) {
 		const startPositionKey =
 			OD.keyAtIndex(startPosition.index, dict);
 		const endPositionKey =
@@ -162,17 +188,46 @@ export default ({
 	const sortPointersAscending = R.curry(_sortPointersAscending);
 
 
+	// split :: (Position, k, k, OSD k v) -> { before: OSD k v, after: OSD k v }?
+	// Splits the dictionary into two dictionaries at the specified split position.
+	// If the split position is not within the dictionary, returns null.
+	function _split(splitPosition, beforeKey, afterKey, dict) {
+		if (!containsPosition(splitPosition, dict)) {
+			return null;
+		}
+
+		const splitDict = splitElement(splitPosition, beforeKey, afterKey, dict);
+		return {
+			before: OD.slice(0, splitPosition.index + 1, splitDict),
+			after: OD.slice(splitPosition.index + 1, OD.count(splitDict), splitDict),
+		};
+	}
+	const split = R.curry(_split);
+
+
+	// countSubelements :: OrderedDictionary k v -> number
+	function countSubelements(dict) {
+		return R.pipe(
+			OD.toValuesList,
+			R.map(elementCount),
+			R.sum
+		)(dict);
+	}
+
 	return {
 		...OD,
 		makePosition,
 		makePointer,
 		positionFromPointer,
 		pointerFromPosition,
+		positionFromAbsoluteOffset,
 		containsPosition,
 		containsPointer,
 		splitElement,
 		removeSlice,
 		sortPointersAscending,
+		split,
+		countSubelements,
 	};
 };
 

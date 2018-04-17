@@ -1,6 +1,6 @@
 import * as R from 'ramda';
 import UUID from 'uuid';
-import * as Paragraph from './Paragraph';
+import Paragraph from './Paragraph';
 import * as Edit from './Edit';
 import * as Range from './Range';
 
@@ -17,7 +17,7 @@ const ParagraphDict = OSD({
 		Paragraph.plainTextContent(Paragraph.contents(p)[0].text.slice(start, end)),
 		Paragraph.empty),
 
-	merge: Paragraph.merge,
+	merge: R.pipe(Paragraph.merge, Paragraph.defragment),
 });
 
 
@@ -62,16 +62,16 @@ function applyEdit(edit, doc) {
 		return R.pipe(
 			ParagraphDict.removeSlice(
 				ParagraphDict.positionFromPointer(pointerRange.start, doc),
-				ParagraphDict.positionFromPointer(pointerRange.end, doc),
-				UUID(),
-				UUID(),
-			),
+				ParagraphDict.positionFromPointer(pointerRange.end, doc)),
 			ParagraphDict.update(
 				pointerRange.start.key,
 				paragraph => Paragraph.insertContent(
 					Paragraph.plainTextContent(edit.text),
 					pointerRange.start.offset,
-					paragraph))
+					paragraph)),
+			ParagraphDict.update(
+				pointerRange.start.key,
+				Paragraph.defragment),
 		)(doc);
 	} else if (edit.type === Edit.types.replaceTextWithParagraphBreak) {
 		const pointerRange =

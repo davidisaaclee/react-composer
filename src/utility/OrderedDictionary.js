@@ -12,7 +12,7 @@ export const empty = { all: {}, order: [] };
 
 // fromArray :: [{ key :: k, value :: v }] -> OrderedDictionary k v
 export const fromArray =
-	array => array.reduce((dict, [key, value], index) => insert(key, value, index, dict), empty);
+	array => array.reduce((dict, {key, value}, index) => insert(key, value, index, dict), empty);
 
 
 // insert :: (k, v, number, OrderedDictionary k v) -> OrderedDictionary k v
@@ -25,10 +25,12 @@ const _insert = (key, value, index, dictionary) => ({
 export const insert = R.curry(_insert);
 
 
+// TODO: Rename to `toValuesArray` for consistency
 // toValuesList :: OrderedDictionary k v -> [v]
 export const toValuesList = ({ all, order }) => order.map(key => all[key]);
 
 
+// TODO: Rename to `toArray` for consistency
 // toList :: OrderedDictionary k v -> [{ key: k, value: v }]
 export const toList = ({ all, order }) => order.map(key => ({ key, value: all[key] }));
 
@@ -158,4 +160,25 @@ export const keyAtIndex = R.curry(_keyAtIndex);
 
 // count :: OrderedDictionary k v -> number
 export const count = R.pipe(R.view(lenses.order), R.length);
+
+
+// slice :: (number, number, OrderedDictionary k v) -> OrderedDictionary k v
+// Copies values between startIndex (inclusive) and endIndex (exclusive) into
+// a new OrderedDictionary, and returns that dictionary.
+function _slice(startIndex, endIndex, dict) {
+	return R.reduce(
+		(d, index) => push(keyAtIndex(index, dict), nth(index, dict), d),
+		empty,
+		R.range(startIndex, endIndex));
+}
+export const slice = R.curry(_slice);
+
+
+// merge :: (OrderedDictionary k v, OrderedDictionary k v) -> OrderedDictionary k v
+// Creates a new dictionary by appending the contents of `d2` to `d1`.
+function _merge(d1, d2) {
+	return fromArray([...toList(d1), ...toList(d2)]);
+}
+export const merge = R.curry(_merge);
+
 

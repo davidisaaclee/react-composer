@@ -1,7 +1,7 @@
 import React from 'react';
 
 import Doc from '../model/Doc';
-import * as ParagraphUtils from '../model/Paragraph';
+import ParagraphUtils from '../model/Paragraph';
 import * as Edit from '../model/Edit';
 import * as DocPointer from '../model/DocPointer';
 import * as DocSelection from '../model/DocSelection';
