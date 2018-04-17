@@ -13,7 +13,8 @@ const ParagraphDict = OSD({
 	containsIndex: (index, p) => index >= 0 && index < Paragraph.characterCount(p),
 	
 	// TODO: better implementation of slice, merge
-	slice: (start, end, p) => Paragraph.appendContent(
+	slice: (start, end, p) => Paragraph.push(
+		UUID(),
 		Paragraph.plainTextContent(Paragraph.toValuesList(p)[0].text.slice(start, end)),
 		Paragraph.empty),
 

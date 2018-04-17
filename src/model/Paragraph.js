@@ -16,8 +16,8 @@ const generateKey = () => UUID();
 
 export default {
 	...ContentDict,
-	make: contents => ContentDict.fromArray(contents.map((c) => ({ key: generateKey(), value: c }))),
 
+	// insertContent :: (Content, Paragraph.AbsoluteOffset, Paragraph) -> Paragraph
 	insertContent: (content, offset, p) => {
 		const insertPosition =
 			ContentDict.positionFromAbsoluteOffset(offset, p);
@@ -36,21 +36,20 @@ export default {
 			splitParagraph);
 	},
 
-	appendContent: (content, p) => ContentDict.push(generateKey(), content, p),
-
 	// removeContentInRange :: (number, number, Paragraph) -> Paragraph
 	removeContentInRange: (start, end, p) => ContentDict.removeSlice(
 		ContentDict.positionFromAbsoluteOffset(start),
 		ContentDict.positionFromAbsoluteOffset(end),
 		p),
 
-	split: (position, paragraph) => ContentDict.splitAtSubelement(position, UUID(), UUID(), paragraph),
-	merge: ContentDict.merge,
+	// characterCount :: Paragraph -> number
 	characterCount: ContentDict.countSubelements,
 
+	// plainTextContent :: string -> Content
 	plainTextContent,
 
 	// TODO
+	// defragment :: Paragraph -> Paragraph
 	defragment: paragraph => ContentDict.fromArray([{
 		key: generateKey(),
 		value: plainTextContent(ContentDict.toValuesList(paragraph).map(R.prop('text')).join(''))
