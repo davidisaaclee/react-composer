@@ -6,11 +6,11 @@ const plainTextContent = text => ({ text });
 
 const lenses = {
 	// contents :: Lens Paragraph [Content]
-	contents: R.lensProp('contents'),
+	contents: R.identity,
 };
 
 // make :: [Content] -> Paragraph
-const make = contents => ({ contents });
+const make = contents => contents;;
 
 // empty :: Paragraph
 const empty = make([]);
@@ -157,6 +157,7 @@ function contentsCharacterCount(contents) {
 
 export {
 	empty,
+	make,
 	contents,
 	insertContent,
 	appendContent,

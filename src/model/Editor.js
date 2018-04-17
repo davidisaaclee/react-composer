@@ -1,7 +1,7 @@
 import * as R from 'ramda';
 import * as Edit from './Edit';
 import * as DocPointer from './DocPointer';
-import * as Doc from './Doc';
+import Doc from './Doc';
 import * as DocSelection from './DocSelection';
 
 const lenses = {
@@ -19,13 +19,21 @@ function applyEdit(edit, prevDoc, nextDoc, editor) {
 	if (edit.type === Edit.types.replaceText) {
 		const pointerRange =
 			Doc.pointerRangeFromSelection(edit.selection, prevDoc);
+		const cursorPosition =
+			Doc.positionFromPointer(pointerRange.start, prevDoc);
+		const cursorPointerInNewDoc =
+			Doc.pointerFromPosition(cursorPosition, nextDoc);
 
 		return R.set(
 			lenses.selection,
 			DocSelection.makeCollapsed(
 				DocPointer.offsetBy(
 					edit.text.length,
-					pointerRange.start)),
+					// TODO: consolidate pointer types
+					{
+						paragraphID: cursorPointerInNewDoc.key,
+						offset: cursorPointerInNewDoc.offset 
+					})),
 			editor);
 	} else if (edit.type === Edit.types.replaceTextWithParagraphBreak) {
 		const pointerRange =
@@ -34,10 +42,7 @@ function applyEdit(edit, prevDoc, nextDoc, editor) {
 		const newParagraphIndex =
 			Doc.indexOfParagraph(pointerRange.start.paragraphID, prevDoc) + 1;
 		const newParagraphID =
-			R.pipe(
-				R.view(Doc.lenses.paragraphOrder),
-				R.nth(newParagraphIndex)
-			)(nextDoc);
+			Doc.keyAtIndex(newParagraphIndex, nextDoc);
 
 		const cursorPosition =
 			DocPointer.make(newParagraphID, 0);

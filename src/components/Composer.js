@@ -1,6 +1,6 @@
 import React from 'react';
 
-import * as Doc from '../model/Doc';
+import Doc from '../model/Doc';
 import * as ParagraphUtils from '../model/Paragraph';
 import * as Edit from '../model/Edit';
 import * as DocPointer from '../model/DocPointer';
@@ -125,7 +125,7 @@ class Composer extends React.Component {
 	// nodeAndOffsetFromPointer :: (DocPointer) -> { node: Node, offset: number }?
 	// Returns the text node and offset within that node for the specified `DocPointer`.
 	nodeAndOffsetFromPointer(pointer) {
-		const node = this.queryParagraphNode(pointer.paragraphID);
+		const node = this.queryParagraphNode(pointer.key);
 		if (node == null) {
 			return null;
 		}
@@ -135,7 +135,7 @@ class Composer extends React.Component {
 		if (textNode == null) {
 			// TODO: Uncertain what to do here.
 			// One case that leads here is an empty <p> node.
-			throw new Error(`No text node for paragraph ${pointer.paragraphID}`);
+			throw new Error(`No text node for paragraph ${pointer.key}`);
 		}
 
 		return { node: textNode, offset: pointer.offset };
