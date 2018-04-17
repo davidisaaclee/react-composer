@@ -7,7 +7,7 @@ import * as Content from 'model/Content';
 const Paragraph = OSD({
 	count: content => content.text.length,
 	containsIndex: (index, content) => index > 0 && index <= content.text.length,
-	slice: (start, end, content) => Content.plainText(content.text.slice(start, end)),
+	slice: Content.slice,
 	merge: (c1, c2) => Content.plainText(c1.text + c2.text),
 });
 

@@ -134,7 +134,6 @@ export default ({
 
 		return R.pipe(
 			OD.remove(splitKey),
-			// TODO: insert needs 4 args
 			OD.insert(beforeKey, before, splitPosition.index),
 			OD.insert(afterKey, after, splitPosition.index + 1),
 		)(dict);

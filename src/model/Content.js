@@ -1,20 +1,16 @@
 
-// Content ::= { text: string }
+// Content ::= { text: string, styles: StyleSet }
 // A fragment of text content, which is rendered uniformly.
 
-const types = {
-	plainText: 'plainText',
-};
 
-
-// make :: (Content.Type, string, object) -> Content
-function make(type, text, fields) {
-	return { type, text, ...fields };
+// make :: (string, StyleSet) -> Content
+function make(text, styles) {
+	return { text, styles };
 }
 
 // plainText :: string -> Content
 function plainText(text) {
-	return make(types.plainText, text, {});
+	return make(text, StyleSet.empty);
 }
 
 // removeInRange :: (number, number, Content) -> Content
@@ -42,16 +38,7 @@ function split(offset, content) {
 function slice(start, end, content) {
 	return {
 		...content,
-		text: content.slice(start, end)
-	};
-}
-
-// append :: (Content, Content) -> [Content]
-function append(c1, c2) {
-	// TODO: Specialize for different types
-	return {
-		...c1,
-		text: c1.text + c2.text
+		text: content.text.slice(start, end)
 	};
 }
 
