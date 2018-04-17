@@ -143,6 +143,19 @@ export default ({
 
 
 	// removeSlice :: (Position, Position, OSD k v) -> OSD k v
+	// Removes the slice between the two specified positions.
+	//
+	// If the slice is contained by a single element, that element
+	// drops the specified slice, and merges the portions before and
+	// after the slice.
+	//
+	// If the slice spans multiple elements, fully-spanned elements
+	// are dropped, and the partially-spanned elements are partially
+	// dropped. The partially-spanned elements are not merged, and
+	// retain the keys they had before being trimmed.
+	//
+	// (ab`c) (def) (gh´i) -> (ab) (i)
+	// (ab`cde´fgh) -> (abfgh)
 	function _removeSlice(startPosition, endPosition, dict) {
 		const startPositionKey =
 			OD.keyAtIndex(startPosition.index, dict);
@@ -159,21 +172,44 @@ export default ({
 				endPosition.offset,
 				elementCount(OD.get(endPositionKey, dict)),
 				OD.get(endPositionKey, dict));
-		const merged =
-			elementMerge(before, after);
 
-		return R.pipe(
-			// Remove all full elements within the slice.
-			d => R.reduce(
-				(dict, key) => OD.remove(key, dict),
-				d,
-				R.map(
-					index => OD.keyAtIndex(index, dict),
-					R.range(startPosition.index + 1, endPosition.index))),
-			OD.remove(startPositionKey),
-			OD.remove(endPositionKey),
-			OD.insert(startPositionKey, merged, startPosition.index),
-		)(dict);
+		if (startPositionKey === endPositionKey) {
+			const merged =
+				elementMerge(before, after);
+
+			return R.pipe(
+				// Remove all full elements within the slice.
+				d => R.reduce(
+					(dict, key) => OD.remove(key, dict),
+					d,
+					R.map(
+						index => OD.keyAtIndex(index, dict),
+						R.range(startPosition.index + 1, endPosition.index))),
+				OD.remove(startPositionKey),
+				OD.remove(endPositionKey),
+				OD.insert(startPositionKey, merged, startPosition.index),
+			)(dict);
+		} else {
+			return R.pipe(
+				// Remove all full elements within the slice.
+				d => R.reduce(
+					(dict, key) => OD.remove(key, dict),
+					d,
+					R.map(
+						index => OD.keyAtIndex(index, dict),
+						R.range(startPosition.index + 1, endPosition.index))),
+				OD.remove(startPositionKey),
+				OD.remove(endPositionKey),
+				OD.insert(
+					startPositionKey,
+					before,
+					startPosition.index),
+				OD.insert(
+					endPositionKey,
+					after,
+					startPosition.index + 1),
+			)(dict);
+		}
 	}
 	const removeSlice = R.curry(_removeSlice);
 

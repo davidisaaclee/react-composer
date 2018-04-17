@@ -104,7 +104,7 @@ export const indexOf = R.curry(_indexOf);
 
 // update :: (k, (v -> v), OrderedDictionary k v) -> OrderedDictionary k v
 const _update = (key, updater, dict) => {
-	if (!contains(key)(dict)) {
+	if (!contains(key, dict)) {
 		return dict;
 	}
 
@@ -180,5 +180,48 @@ function _merge(d1, d2) {
 	return fromArray([...toList(d1), ...toList(d2)]);
 }
 export const merge = R.curry(_merge);
+
+
+// mergeElements :: (number, number, MergeMethod, OrderedDictionary k v) -> OrderedDictionary k v
+// where MergeMethod ::= ([{ key: k, value: v }]) -> { key: k, value: v }
+// Merges a subsequence of the dictionary, using the supplied merge method.
+//
+//		const dict = fromArray([
+//			{ key: 'a', value: 1 },
+//			{ key: 'b', value: 2 },
+//			{ key: 'c', value: 3 },
+//		]);
+//    const merged = mergeElements(
+//      1,
+//      1,
+//      ([{ value }]) => ({
+//        key: 'd',
+//        value: value[0] + value[1]
+//      }));
+//    toList(merged) => [
+//      { key: 'a', value: 1 },
+//      { key: 'd', value: 5 },
+//    ]
+function _mergeElements(startIndex, count, mergeMethod, dict) {
+	const mergedElement = R.pipe(
+		slice(startIndex, startIndex + count),
+		toList,
+		mergeMethod
+	)(dict);
+
+	return R.pipe(
+		// Remove the elements to be merged from the dictionary.
+		dict => R.reduce(
+			(dict, key) => remove(key, dict),
+			dict,
+			R.map(
+				index => keyAtIndex(index, dict),
+				R.range(startIndex, startIndex + count))),
+
+		// Insert the merged element.
+		insert(mergedElement.key, mergedElement.value, startIndex),
+	)(dict);
+}
+export const mergeElements = R.curry(_mergeElements);
 
 

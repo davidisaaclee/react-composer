@@ -43,16 +43,36 @@ function applyEdit(edit, doc) {
 		const pointerRange =
 			pointerRangeFromSelection(edit.selection, doc);
 
+		const positionRange = Range.make(
+			Doc.positionFromPointer(pointerRange.start, doc),
+			Doc.positionFromPointer(pointerRange.end, doc));
+
 		return R.pipe(
+			// Remove the selected slice.
 			Doc.removeSlice(
-				Doc.positionFromPointer(pointerRange.start, doc),
-				Doc.positionFromPointer(pointerRange.end, doc)),
+				positionRange.start,
+				positionRange.end),
+			// If the selection we just removed spanned multiple paragraphs,
+			// removeSlice did not attempt to merge the bookending paragraphs.
+			// We need to stitch those together now.
+			d => (pointerRange.start.key === pointerRange.end.key
+				? d
+				: Doc.mergeElements(
+					positionRange.start.index,
+					positionRange.end.index + 1,
+					([before, after]) => ({
+						key: before.key,
+						value: Paragraph.merge(before.value, after.value),
+					}),
+					d)),
+			// Insert the text that is replacing the selection.
 			Doc.update(
 				pointerRange.start.key,
 				paragraph => Paragraph.insertContent(
 					Content.plainText(edit.text),
 					pointerRange.start.offset,
 					paragraph)),
+			// Defragment the edited paragraph.
 			Doc.update(
 				pointerRange.start.key,
 				Paragraph.defragment),
