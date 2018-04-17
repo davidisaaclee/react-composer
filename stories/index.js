@@ -7,6 +7,7 @@ import { withState } from '@dump247/storybook-state';
 import UUID from 'uuid';
 import Composer, { Doc, Editor } from '../src';
 import Paragraph from '../src/model/Paragraph';
+import * as Content from '../src/model/Content';
 import * as sampleText from './sampleText';
 
 const initialDocument =
@@ -16,7 +17,7 @@ const initialDocument =
 			`p${idx}`,
 			Paragraph.fromArray([{
 				key: UUID(),
-				value: Paragraph.plainTextContent(text)
+				value: Content.plainText(text)
 			}])),
 	)(doc), Doc.empty);
 

@@ -1,6 +1,7 @@
 import * as R from 'ramda';
 import UUID from 'uuid';
 import Paragraph from 'model/Paragraph';
+import * as Content from 'model/Content';
 import * as Edit from 'model/Edit';
 import * as Range from 'model/Range';
 
@@ -15,7 +16,7 @@ const Doc = OSD({
 	// TODO: better implementation of slice, merge
 	slice: (start, end, p) => Paragraph.push(
 		UUID(),
-		Paragraph.plainTextContent(Paragraph.toValuesList(p)[0].text.slice(start, end)),
+		Content.plainText(Paragraph.toValuesList(p)[0].text.slice(start, end)),
 		Paragraph.empty),
 
 	merge: R.pipe(Paragraph.merge, Paragraph.defragment),
@@ -49,7 +50,7 @@ function applyEdit(edit, doc) {
 			Doc.update(
 				pointerRange.start.key,
 				paragraph => Paragraph.insertContent(
-					Paragraph.plainTextContent(edit.text),
+					Content.plainText(edit.text),
 					pointerRange.start.offset,
 					paragraph)),
 			Doc.update(

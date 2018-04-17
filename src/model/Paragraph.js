@@ -1,16 +1,15 @@
 import * as R from 'ramda';
 import UUID from 'uuid';
 import OSD from 'utility/OrderedSubdivisibleDictionary';
+import * as Content from 'model/Content'; 
 
 // Paragraph ::= OrderedSubdivisibleDictionary ContentID Content
 const Paragraph = OSD({
 	count: content => content.text.length,
 	containsIndex: (index, content) => index > 0 && index <= content.text.length,
-	slice: (start, end, content) => plainTextContent(content.text.slice(start, end)),
-	merge: (c1, c2) => plainTextContent(c1.text + c2.text),
+	slice: (start, end, content) => Content.plainText(content.text.slice(start, end)),
+	merge: (c1, c2) => Content.plainText(c1.text + c2.text),
 });
-
-const plainTextContent = text => ({ text });
 
 const generateKey = () => UUID();
 
@@ -45,14 +44,11 @@ export default {
 	// characterCount :: Paragraph -> number
 	characterCount: Paragraph.countSubelements,
 
-	// plainTextContent :: string -> Content
-	plainTextContent,
-
 	// TODO
 	// defragment :: Paragraph -> Paragraph
 	defragment: paragraph => Paragraph.fromArray([{
 		key: generateKey(),
-		value: plainTextContent(Paragraph.toValuesList(paragraph).map(R.prop('text')).join(''))
+		value: Content.plainText(Paragraph.toValuesList(paragraph).map(R.prop('text')).join(''))
 	}]),
 };
 
