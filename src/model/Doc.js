@@ -22,10 +22,6 @@ const Doc = OSD({
 });
 
 
-const make = (order, all) => Doc.fromArray(order.map(k => all[k]));
-const empty = make([], {});
-
-
 // pointerRangeFromSelection :: (DocSelection Doc.Pointer, Doc) -> Range OSD.Position
 function pointerRangeFromSelection(selection, doc) {
 	const [start, end] =
