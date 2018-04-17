@@ -6,8 +6,8 @@ import * as Range from './Range';
 
 import OSD from '../utility/OrderedSubdivisibleDictionary';
 
-// ParagraphDict ::= OrderedSubdivisibleDictionary ParagraphID Paragraph
-const ParagraphDict = OSD({
+// Doc ::= OrderedSubdivisibleDictionary ParagraphID Paragraph
+const Doc = OSD({
 	count: Paragraph.characterCount,
 
 	containsIndex: (index, p) => index >= 0 && index < Paragraph.characterCount(p),
@@ -22,19 +22,19 @@ const ParagraphDict = OSD({
 });
 
 
-const make = (order, all) => ParagraphDict.fromArray(order.map(k => all[k]));
+const make = (order, all) => Doc.fromArray(order.map(k => all[k]));
 const empty = make([], {});
 
 
 // pointerRangeFromSelection :: (DocSelection, Doc) -> Range OSD.Position
 function pointerRangeFromSelection(selection, doc) {
 	const [start, end] =
-		ParagraphDict.sortPointersAscending(
+		Doc.sortPointersAscending(
 			[
-				ParagraphDict.makePointer(
+				Doc.makePointer(
 					selection.anchor.paragraphID,
 					selection.anchor.offset),
-				ParagraphDict.makePointer(
+				Doc.makePointer(
 					selection.focus.paragraphID,
 					selection.focus.offset),
 			],
@@ -50,16 +50,16 @@ function applyEdit(edit, doc) {
 			pointerRangeFromSelection(edit.selection, doc);
 
 		return R.pipe(
-			ParagraphDict.removeSlice(
-				ParagraphDict.positionFromPointer(pointerRange.start, doc),
-				ParagraphDict.positionFromPointer(pointerRange.end, doc)),
-			ParagraphDict.update(
+			Doc.removeSlice(
+				Doc.positionFromPointer(pointerRange.start, doc),
+				Doc.positionFromPointer(pointerRange.end, doc)),
+			Doc.update(
 				pointerRange.start.key,
 				paragraph => Paragraph.insertContent(
 					Paragraph.plainTextContent(edit.text),
 					pointerRange.start.offset,
 					paragraph)),
-			ParagraphDict.update(
+			Doc.update(
 				pointerRange.start.key,
 				Paragraph.defragment),
 		)(doc);
@@ -67,17 +67,17 @@ function applyEdit(edit, doc) {
 		const pointerRange =
 			pointerRangeFromSelection(edit.selection, doc);
 		const splitPosition =
-			ParagraphDict.positionFromPointer(
-				ParagraphDict.makePointer(
+			Doc.positionFromPointer(
+				Doc.makePointer(
 					pointerRange.start.paragraphID,
 					pointerRange.start.offset),
 				doc); 
 
 		return R.pipe(
-			ParagraphDict.removeSlice(
-				ParagraphDict.positionFromPointer(pointerRange.start, doc),
-				ParagraphDict.positionFromPointer(pointerRange.end, doc)),
-			ParagraphDict.splitElement(
+			Doc.removeSlice(
+				Doc.positionFromPointer(pointerRange.start, doc),
+				Doc.positionFromPointer(pointerRange.end, doc)),
+			Doc.splitElement(
 				splitPosition,
 				UUID(),
 				UUID())
@@ -89,7 +89,7 @@ function applyEdit(edit, doc) {
 }
 
 export default {
-	...ParagraphDict,
+	...Doc,
 	applyEdit,
 	pointerRangeFromSelection,
 };

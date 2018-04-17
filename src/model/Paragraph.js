@@ -2,8 +2,8 @@ import * as R from 'ramda';
 import UUID from 'uuid';
 import OSD from '../utility/OrderedSubdivisibleDictionary';
 
-// ContentDict ::= OrderedSubdivisibleDictionary ContentID Content
-const ContentDict = OSD({
+// Paragraph ::= OrderedSubdivisibleDictionary ContentID Content
+const Paragraph = OSD({
 	count: content => content.text.length,
 	containsIndex: (index, content) => index > 0 && index <= content.text.length,
 	slice: (start, end, content) => plainTextContent(content.text.slice(start, end)),
@@ -15,20 +15,20 @@ const plainTextContent = text => ({ text });
 const generateKey = () => UUID();
 
 export default {
-	...ContentDict,
+	...Paragraph,
 
 	// insertContent :: (Content, Paragraph.AbsoluteOffset, Paragraph) -> Paragraph
 	insertContent: (content, offset, p) => {
 		const insertPosition =
-			ContentDict.positionFromAbsoluteOffset(offset, p);
+			Paragraph.positionFromAbsoluteOffset(offset, p);
 
-		const splitParagraph = ContentDict.splitElement(
+		const splitParagraph = Paragraph.splitElement(
 			insertPosition,
 			generateKey(),
 			generateKey(),
 			p);
 
-		return ContentDict.insert(
+		return Paragraph.insert(
 			generateKey(),
 			content,
 			// Insert after the "before" split node.
@@ -37,22 +37,22 @@ export default {
 	},
 
 	// removeContentInRange :: (number, number, Paragraph) -> Paragraph
-	removeContentInRange: (start, end, p) => ContentDict.removeSlice(
-		ContentDict.positionFromAbsoluteOffset(start),
-		ContentDict.positionFromAbsoluteOffset(end),
+	removeContentInRange: (start, end, p) => Paragraph.removeSlice(
+		Paragraph.positionFromAbsoluteOffset(start),
+		Paragraph.positionFromAbsoluteOffset(end),
 		p),
 
 	// characterCount :: Paragraph -> number
-	characterCount: ContentDict.countSubelements,
+	characterCount: Paragraph.countSubelements,
 
 	// plainTextContent :: string -> Content
 	plainTextContent,
 
 	// TODO
 	// defragment :: Paragraph -> Paragraph
-	defragment: paragraph => ContentDict.fromArray([{
+	defragment: paragraph => Paragraph.fromArray([{
 		key: generateKey(),
-		value: plainTextContent(ContentDict.toValuesList(paragraph).map(R.prop('text')).join(''))
+		value: plainTextContent(Paragraph.toValuesList(paragraph).map(R.prop('text')).join(''))
 	}]),
 };
 
