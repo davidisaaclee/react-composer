@@ -17,7 +17,6 @@ const generateKey = () => UUID();
 export default {
 	...ContentDict,
 	make: contents => ContentDict.fromArray(contents.map((c) => ({ key: generateKey(), value: c }))),
-	contents: p => ContentDict.toValuesList(p),
 
 	insertContent: (content, offset, p) => {
 		const insertPosition =

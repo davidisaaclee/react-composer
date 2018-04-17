@@ -74,9 +74,9 @@ const Paragraph = ({ paragraph, id, ...restProps }) => (
 		{...{ [k.paragraphIDAttributeKey]: id }}
 		{...restProps}
 	>
-		{ParagraphUtils.contents(paragraph).map(content => (
-			<ParagraphContent>
-				{content}
+		{ParagraphUtils.toList(paragraph).map(({ key, value }) => (
+			<ParagraphContent key={key}>
+				{value}
 			</ParagraphContent>
 		))}
 	</p>
@@ -217,11 +217,11 @@ class Composer extends React.Component {
 				onKeyPress={this.handleKeyPress}
 				{...restProps}
 			>
-				{Doc.paragraphList(doc).map(({ id, paragraph }) => (
+				{Doc.toList(doc).map(({ key, value }) => (
 					<Paragraph
-						key={id}
-						paragraph={paragraph}
-						id={id}
+						key={key}
+						paragraph={value}
+						id={key}
 					/>
 				))}
 			</EditorContainer>

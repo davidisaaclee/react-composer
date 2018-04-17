@@ -14,7 +14,7 @@ const ParagraphDict = OSD({
 	
 	// TODO: better implementation of slice, merge
 	slice: (start, end, p) => Paragraph.appendContent(
-		Paragraph.plainTextContent(Paragraph.contents(p)[0].text.slice(start, end)),
+		Paragraph.plainTextContent(Paragraph.toValuesList(p)[0].text.slice(start, end)),
 		Paragraph.empty),
 
 	merge: R.pipe(Paragraph.merge, Paragraph.defragment),
@@ -98,18 +98,12 @@ function applyEdit(edit, doc) {
 	}
 }
 
-function paragraphList(doc) {
-	return ParagraphDict.toList(doc)
-		.map(({ key, value }) => ({ id: key, paragraph: value }));
-}
-
 export default {
 	...ParagraphDict,
 	indexOfParagraph,
 	appendParagraph,
 	setParagraphContents,
 	applyEdit,
-	paragraphList,
 	pointerRangeFromSelection,
 };
 
