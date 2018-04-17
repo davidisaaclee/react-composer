@@ -26,18 +26,11 @@ const make = (order, all) => Doc.fromArray(order.map(k => all[k]));
 const empty = make([], {});
 
 
-// pointerRangeFromSelection :: (DocSelection, Doc) -> Range OSD.Position
+// pointerRangeFromSelection :: (DocSelection Doc.Pointer, Doc) -> Range OSD.Position
 function pointerRangeFromSelection(selection, doc) {
 	const [start, end] =
 		Doc.sortPointersAscending(
-			[
-				Doc.makePointer(
-					selection.anchor.paragraphID,
-					selection.anchor.offset),
-				Doc.makePointer(
-					selection.focus.paragraphID,
-					selection.focus.offset),
-			],
+			[selection.anchor, selection.focus],
 			doc);
 
 	return Range.make(start, end);

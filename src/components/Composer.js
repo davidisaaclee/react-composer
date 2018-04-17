@@ -3,7 +3,6 @@ import React from 'react';
 import Doc from 'model/Doc';
 import ParagraphUtils from 'model/Paragraph';
 import * as Edit from 'model/Edit';
-import * as DocPointer from 'model/DocPointer';
 import * as DocSelection from 'model/DocSelection';
 import * as EditorCommand from './EditorCommand';
 
@@ -37,7 +36,7 @@ function ancestorParagraphIDForNode(node) {
 	}
 }
 
-// docSelectionFromNativeSelection :: Selection -> DocSelection
+// docSelectionFromNativeSelection :: Selection -> DocSelection Doc.Pointer
 function docSelectionFromNativeSelection(selection) {
 	if (selection.anchorNode.nodeType !== Node.TEXT_NODE || selection.focusNode.nodeType !== Node.TEXT_NODE) {
 		throw new Error(errorMessages.selectNontextNode(selection));
@@ -54,9 +53,12 @@ function docSelectionFromNativeSelection(selection) {
 		throw new Error(errorMessages.couldNotFindParagraphIDForSelectionFocus(selection.focusNode));
 	}
 
-	// TODO: There should be a defined mapping between `Selection`'s offsets and model offsets.
-	const anchor = DocPointer.make(anchorParagraphID, selection.anchorOffset);
-	const focus = DocPointer.make(focusParagraphID, selection.focusOffset);
+	// TODO: There should be an explicitly-defined mapping between `Selection`'s offsets and model offsets.
+	const anchor = 
+		Doc.makePointer(anchorParagraphID, selection.anchorOffset);
+	const focus =
+		Doc.makePointer(focusParagraphID, selection.focusOffset);
+
 	return DocSelection.make(anchor, focus);
 }
 
@@ -122,8 +124,8 @@ class Composer extends React.Component {
 		return this.editorContainerRef.querySelector(selectorForParagraphID);
 	}
 	
-	// nodeAndOffsetFromPointer :: (DocPointer) -> { node: Node, offset: number }?
-	// Returns the text node and offset within that node for the specified `DocPointer`.
+	// nodeAndOffsetFromPointer :: (Doc.Pointer) -> { node: Node, offset: number }?
+	// Returns the text node and offset within that node for the specified pointer.
 	nodeAndOffsetFromPointer(pointer) {
 		const node = this.queryParagraphNode(pointer.key);
 		if (node == null) {
