@@ -10,7 +10,7 @@ function make(text, styles) {
 
 // plainText :: string -> Content
 function plainText(text) {
-	return make(text, StyleSet.empty);
+	return make(text, {});
 }
 
 // removeInRange :: (number, number, Content) -> Content
