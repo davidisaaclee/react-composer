@@ -13,11 +13,7 @@ const Doc = OSD({
 
 	containsIndex: (index, p) => index >= 0 && index < Paragraph.characterCount(p),
 	
-	// TODO: better implementation of slice, merge
-	slice: (start, end, p) => Paragraph.push(
-		UUID(),
-		Content.plainText(Paragraph.toValuesList(p)[0].text.slice(start, end)),
-		Paragraph.empty),
+	slice: Paragraph.slice,
 
 	removeSlice: (startOffset, endOffset, paragraph) => Paragraph.removeSlice(
 		Paragraph.positionFromAbsoluteOffset(startOffset, paragraph),
