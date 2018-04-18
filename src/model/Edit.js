@@ -1,4 +1,8 @@
 
+/*
+ * An `Edit` represents the intent to mutate the document.
+ */
+
 const types = {
 	// Either inserting text at a caret (empty `selection`),
 	// or replacing a selection of text with new text.
