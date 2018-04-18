@@ -9,6 +9,8 @@ const types = {
 	replaceText: 'replaceText',
 
 	replaceTextWithParagraphBreak: 'replaceTextWithParagraphBreak',
+
+	applyStyles: 'applyStyles',
 };
 
 // replaceText :: (DocSelection Doc.Pointer, string) -> Edit
@@ -24,10 +26,18 @@ const replaceTextWithParagraphBreak = (selection) => ({
 	selection,
 });
 
+// applyStyles :: (DocSelection Doc.Pointer, StyleSet) -> Edit
+const applyStyles = (selection, styles) => ({
+	type: types.applyStyles,
+	selection,
+	styles
+});
+
 
 export {
 	types,
 	replaceText,
 	replaceTextWithParagraphBreak,
+	applyStyles,
 };
 

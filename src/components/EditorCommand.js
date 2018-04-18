@@ -10,6 +10,8 @@
 const types = {
 	text: 'text',
 	paragraphBreak: 'paragraphBreak',
+	bold: 'bold',
+	italicize: 'italicize',
 };
 
 const make = (type, fields = {}) => ({ type, ...fields });
@@ -19,6 +21,12 @@ const text = text => make(types.text, { text });
 
 // paragraphBreak :: EditorCommand
 const paragraphBreak = make(types.paragraphBreak);
+
+// bold :: EditorCommand
+const bold = make(types.bold);
+
+// italicize :: EditorCommand
+const italicize = make(types.italicize);
 
 // fromKeyEvent :: KeyEvent -> EditorCommand?
 function fromKeyEvent(keyEvent) {
@@ -51,6 +59,15 @@ function fromKeyEvent(keyEvent) {
 		return keyEvent.ctrlKey || keyEvent.metaKey;
 	}
 
+	function isApplyBoldKeyEvent(keyEvent) {
+		// TODO: Switch meta/ctrl based on client?
+		return keyEvent.metaKey && keyEvent.key === 'b';
+	}
+
+	function isItalicizeKeyEvent(keyEvent) {
+		return keyEvent.metaKey && keyEvent.key === 'i';
+	}
+
 	if (keyEvent.key === 'Enter') {
 		return paragraphBreak;
 	} else if (isArrowKeyEvent(keyEvent)) {
@@ -58,7 +75,13 @@ function fromKeyEvent(keyEvent) {
 	} else if (isModifierKeyEvent(keyEvent)) {
 		return null;
 	} else if (isCommandKeyEvent(keyEvent)) {
-		return null;
+		if (isApplyBoldKeyEvent(keyEvent)) {
+			return bold;
+		} else if (isItalicizeKeyEvent(keyEvent)) {
+			return italicize;
+		} else {
+			return null;
+		}
 	} else {
 		return text(keyEvent.key);
 	}

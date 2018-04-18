@@ -35,6 +35,166 @@ function pointerRangeFromSelection(selection, doc) {
 	return Range.make(start, end);
 }
 
+// applyStylesInRange :: (Range Doc.Pointer, StyleSet, Doc) -> Doc
+// Merges the specified style set with the existing styles of content
+// in the specified range.
+function applyStylesInRange({ start, end }, styles, doc) {
+	function applyStylesToContent(styles, content) {
+		return {
+			...content,
+			styles: {
+				...content.styles,
+				...styles
+			}
+		};
+	}
+
+	function applyStylesToParagraphSlice(startContentIndex, endContentIndex, paragraph) {
+		let styledParagraph = paragraph;
+
+		for (let contentIndex = startContentIndex; contentIndex < endContentIndex; contentIndex++) {
+			styledParagraph = Paragraph.update(
+				Paragraph.keyAtIndex(contentIndex, paragraph),
+				content => applyStylesToContent(styles, content),
+				styledParagraph);
+		}
+
+		return styledParagraph;
+	}
+
+	// Since we're going to split the contents at the bookends of the range,
+	// we can decide what the keys of those new contents will be.
+	// These keys correspond to the first and last contents which will
+	// receive the new styles.
+	const startContentKey = UUID();
+	const endContentKey = UUID();
+
+	// Split the Contents at the start and end of the range.
+	// (We need to do this so that we can apply a style to
+	// only the selected part of the Content.)
+	const docSplitAtStart = Doc.update(
+		start.key,
+		(paragraph) => {
+			const startPositionInParagraph =
+				Paragraph.positionFromAbsoluteOffset(
+					start.offset,
+					paragraph);
+			return Paragraph.splitElementInPlace(
+				startPositionInParagraph,
+				UUID(),
+				startContentKey,
+				paragraph);
+		},
+		doc);
+	const docSplitAtStartAndEnd = Doc.update(
+		end.key,
+		paragraph => {
+			const endPositionInParagraph =
+				Paragraph.positionFromAbsoluteOffset(
+					end.offset,
+					paragraph);
+			return Paragraph.splitElementInPlace(
+				endPositionInParagraph,
+				endContentKey,
+				UUID(),
+				paragraph);
+		},
+		docSplitAtStart);
+
+	// Update all Contents within the range with the new styles.
+	let styledDoc = docSplitAtStartAndEnd;
+
+	const docPositionRange = Range.make(
+		Doc.positionFromPointer(start, styledDoc),
+		Doc.positionFromPointer(end, styledDoc));
+
+	const paragraphPositionRange = Range.make(
+		Paragraph.positionFromAbsoluteOffset(
+			docPositionRange.start.offset,
+			Doc.nth(docPositionRange.start.index, styledDoc)),
+		Paragraph.positionFromAbsoluteOffset(
+			docPositionRange.end.offset,
+			Doc.nth(docPositionRange.end.index, styledDoc)));
+
+	if (start.key === end.key) {
+		// If the range is within one paragraph, just iterate through that range of content.
+		styledDoc = Doc.update(
+			Doc.keyAtIndex(
+				docPositionRange.start.index,
+				styledDoc),
+			paragraph => {
+				const startContentIndex = 
+					paragraphPositionRange.start.index;
+				const endContentIndex =
+					paragraphPositionRange.end.index;
+
+				return applyStylesToParagraphSlice(
+					startContentIndex,
+					endContentIndex,
+					paragraph)
+			},
+			styledDoc);
+	} else {
+		// Update the styles of the partial paragraph at the start of the selection.
+		styledDoc = Doc.update(
+			Doc.keyAtIndex(
+				docPositionRange.start.index,
+				styledDoc),
+			paragraph => {
+				const startContentIndex = 
+					paragraphPositionRange.start.index;
+				const endContentIndex =
+					Paragraph.count(paragraph);
+
+				return applyStylesToParagraphSlice(
+					startContentIndex,
+					endContentIndex,
+					paragraph)
+			},
+			styledDoc);
+
+		// Update the styles of the fully-selected paragraphs.
+		for (let i = docPositionRange.start.index + 1; i < docPositionRange.end.index; i++) {
+			styledDoc = Doc.update(
+				Doc.keyAtIndex(
+					i,
+					styledDoc),
+				paragraph => {
+					const startContentIndex = 
+						0;
+					const endContentIndex =
+						Paragraph.count(paragraph);
+
+					return applyStylesToParagraphSlice(
+						startContentIndex,
+						endContentIndex,
+						paragraph);
+				},
+				styledDoc);
+		}
+
+		// Update the styles of the partial paragraph at the end of the selection.
+		styledDoc = Doc.update(
+			Doc.keyAtIndex(
+				docPositionRange.end.index,
+				styledDoc),
+			paragraph => {
+				const startContentIndex = 
+					0;
+				const endContentIndex =
+					paragraphPositionRange.end.index;
+
+				return applyStylesToParagraphSlice(
+					startContentIndex,
+					endContentIndex,
+					paragraph);
+			},
+			styledDoc);
+	}
+
+	return styledDoc;
+}
+
 // applyEdit :: (Edit, Doc) -> Doc
 function applyEdit(edit, doc) {
 	if (edit.type === Edit.types.replaceText) {
@@ -109,6 +269,13 @@ function applyEdit(edit, doc) {
 				UUID(),
 				UUID())
 		)(doc);
+	} else if (edit.type === Edit.types.applyStyles) {
+		const { selection, styles } = edit;
+
+		const pointerRange =
+			pointerRangeFromSelection(selection, doc);
+
+		return applyStylesInRange(pointerRange, styles, doc);
 	} else {
 		console.error("Unhandled edit type:", edit.type);
 		return doc;

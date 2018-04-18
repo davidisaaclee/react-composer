@@ -254,8 +254,15 @@ class Composer extends React.Component {
 					return Edit.replaceTextWithParagraphBreak(
 						docSelectionFromNativeSelection(getSelection()));
 
-				case EditorCommand.types.moveFocus:
-					return null;
+				case EditorCommand.types.bold:
+					return Edit.applyStyles(
+						docSelectionFromNativeSelection(getSelection()),
+						{ bold: true });
+
+				case EditorCommand.types.italicize:
+					return Edit.applyStyles(
+						docSelectionFromNativeSelection(getSelection()),
+						{ italic: true });
 
 				default:
 					console.error("Unrecognized command type", command.type);
