@@ -79,7 +79,7 @@ export default ({
 	// Returns a Position representing the specified subelement offset from
 	// the beginning of the dictionary.
 	// If the offset is not within the dictionary, returns null.
-	function positionFromAbsoluteOffset(absoluteOffset, dict) {
+	function _positionFromAbsoluteOffset(absoluteOffset, dict) {
 		if (absoluteOffset < 0) {
 			return null;
 		}
@@ -99,6 +99,7 @@ export default ({
 
 		return null;
 	}
+	const positionFromAbsoluteOffset = R.curry(_positionFromAbsoluteOffset);
 
 
 	// containsPosition :: (Position, OSD) -> boolean
