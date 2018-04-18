@@ -10,6 +10,7 @@
 const types = {
 	text: 'text',
 	paragraphBreak: 'paragraphBreak',
+	moveFocus: 'moveFocus',
 };
 
 const make = (type, fields = {}) => ({ type, ...fields });
@@ -20,8 +21,21 @@ const text = text => make(types.text, { text });
 // paragraphBreak :: EditorCommand
 const paragraphBreak = make(types.paragraphBreak);
 
+// moveFocus :: EditorCommand
+const moveFocus = make(types.moveFocus);
+
 // fromKeyEvent :: KeyEvent -> EditorCommand?
 function fromKeyEvent(keyEvent) {
+	function isArrowKeyEvent(keyEvent) {
+		const arrowKeys = {
+			'ArrowLeft': true,
+			'ArrowRight': true,
+			'ArrowUp': true,
+			'ArrowDown': true,
+		};
+
+		return arrowKeys[keyEvent.key];
+	}
 
 	function isModifierKeyEvent(keyEvent) {
 		const modifierKeys = {
@@ -36,6 +50,8 @@ function fromKeyEvent(keyEvent) {
 
 	if (keyEvent.key === 'Enter') {
 		return paragraphBreak;
+	} else if (isArrowKeyEvent(keyEvent)) {
+		return moveFocus;
 	} else if (isModifierKeyEvent(keyEvent)) {
 		return null;
 	} else {

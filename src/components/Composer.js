@@ -207,8 +207,9 @@ const EditorContainer = ({ editable = false, innerRef, ...restProps }) => (
 // -- 
 
 // document :: Doc
-// selection :: DocSelection?
+// selection :: (DocSelection Doc.Pointer)?
 // onEdit :: Edit -> ()
+// onSelectionChange :: (DocSelection Doc.Position) -> ()
 class Composer extends React.Component {
 	constructor(props) {
 		super(props);
@@ -218,7 +219,7 @@ class Composer extends React.Component {
 
 
 	// -- Helpers
-	// rangeFromSelection :: DocSelection -> Range
+	// rangeFromSelection :: DocSelection Doc.Pointer -> Range
 	rangeFromSelection(selection) {
 		const pointerRange =
 			Doc.pointerRangeFromSelection(selection, this.props.document);
@@ -257,22 +258,50 @@ class Composer extends React.Component {
 					return Edit.replaceTextWithParagraphBreak(
 						docSelectionFromNativeSelection(getSelection()));
 
+				case EditorCommand.types.moveFocus:
+					return null;
+
 				default:
 					console.error("Unrecognized command type", command.type);
 					return null;
 			}
 		}
 
-		const command = EditorCommand.fromKeyEvent(evt);
+		const handleCommand = (command) => {
+			switch (command.type) {
+				case EditorCommand.types.text:
+					return;
+
+				case EditorCommand.types.paragraphBreak:
+					return;
+
+				case EditorCommand.types.moveFocus:
+					const selection =
+						docSelectionFromNativeSelection(getSelection());
+					this.props.onSelectionChange(selection);
+					return;
+
+				default:
+					console.error("Unrecognized command type", command.type);
+					return null;
+			}
+		}
+
+		const command =
+			EditorCommand.fromKeyEvent(evt);
 
 		if (command != null) {
+			handleCommand(command);
+
 			const edit = editForCommand(command);
-			this.props.onEdit(edit);
-			evt.preventDefault();
+			if (edit != null) {
+				this.props.onEdit(edit);
+				evt.preventDefault();
+			}
 		}
 	}
 
-	// renderSelection :: DocSelection? -> ()
+	// renderSelection :: (DocSelection Doc.Pointer)? -> ()
 	// Sets the browser's selection range to the specified document selection.
 	// If a null selection is provided, clears the browser selection range.
 	renderSelection(selection) {
@@ -292,7 +321,11 @@ class Composer extends React.Component {
 	}
 
 	render() {
-		const { document: doc, selection, onEdit, ...restProps } = this.props;
+		const {
+			document: doc, selection,
+			onEdit, onSelectionChange,
+			...restProps
+		} = this.props;
 
 		return (
 			<EditorContainer
@@ -313,6 +346,13 @@ class Composer extends React.Component {
 		);
 	}
 }
+
+Composer.defaultProps = {
+	selection: null,
+	document: Doc.empty,
+	onEdit: () => null,
+	onSelectionChange: () => null,
+};
 
 export default Composer;
 
