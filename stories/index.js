@@ -25,7 +25,9 @@ storiesOf('Composer', module)
 				console.log("Did update state:", newState);
 				store.set(newState);
 			}}
-			onSelectionChange={sel => console.log(sel)}
+			onSelectionChange={selection => store.set({
+				editor: { ...store.state.editor, selection }
+			})}
 		/>
   )))
   .add('text decoration', withState({ doc: stylesDocument, editor: initialEditor }, (store) => (
@@ -45,7 +47,9 @@ storiesOf('Composer', module)
 				console.log("Did update state:", newState);
 				store.set(newState);
 			}}
-			onSelectionChange={sel => console.log(sel)}
+			onSelectionChange={selection => store.set({
+				editor: { ...store.state.editor, selection }
+			})}
 		/>
   )))
 
