@@ -247,6 +247,20 @@ export default ({
 	const split = R.curry(_split);
 
 
+	// sliceBySubelements :: (Position, Position, OSD k v) -> OSD k v
+	// Returns a copy of the slice between the two specified positions.
+	//
+	// (ab`cde´ef) -> (cde)
+	// (ab`c)(de´ef) -> (c)(de)
+	// (ab`c)(d)(e´ef) -> (c)(d)(e)
+	function _sliceBySubelements(start, end, dict) {
+		return R.pipe(
+			removeSlice(startPosition(dict), start),
+			removeSlice(end, endPosition(dict)),
+		)(dict);
+	}
+	const sliceBySubelements = R.curry(_sliceBySubelements);
+
 	// countSubelements :: OrderedDictionary k v -> number
 	function countSubelements(dict) {
 		return R.pipe(
@@ -269,6 +283,7 @@ export default ({
 		removeSlice,
 		sortPointersAscending,
 		split,
+		sliceBySubelements,
 		countSubelements,
 	};
 };

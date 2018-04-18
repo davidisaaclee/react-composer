@@ -12,8 +12,11 @@ const Doc = OSD({
 	count: Paragraph.characterCount,
 
 	containsIndex: (index, p) => index >= 0 && index < Paragraph.characterCount(p),
-	
-	slice: Paragraph.slice,
+
+	slice: (start, end, paragraph) => Paragraph.sliceBySubelements(
+		Paragraph.positionFromAbsoluteOffset(start, paragraph),
+		Paragraph.positionFromAbsoluteOffset(end, paragraph),
+		paragraph),
 
 	removeSlice: (startOffset, endOffset, paragraph) => Paragraph.removeSlice(
 		Paragraph.positionFromAbsoluteOffset(startOffset, paragraph),
