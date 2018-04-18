@@ -237,7 +237,7 @@ export default ({
 	const removeSlice = R.curry(_removeSlice);
 
 
-// sortPointersAscending :: ([Pointer], OSD) -> [Pointer]
+	// sortPointersAscending :: ([Pointer], OSD) -> [Pointer]
 	function _sortPointersAscending(pointers, dict) {
 		return R.sortWith([
 			R.ascend(pointer => OD.indexOf(pointer.key, dict)),
