@@ -166,10 +166,15 @@ export const count = R.pipe(R.view(lenses.order), R.length);
 // Copies values between startIndex (inclusive) and endIndex (exclusive) into
 // a new OrderedDictionary, and returns that dictionary.
 function _slice(startIndex, endIndex, dict) {
-	return R.reduce(
-		(d, index) => push(keyAtIndex(index, dict), nth(index, dict), d),
-		empty,
-		R.range(startIndex, endIndex));
+	let sliced = empty;
+
+	for (let index = startIndex; index < endIndex; index++) {
+		const key = keyAtIndex(index, dict);
+		const value = nth(index, dict);
+		sliced = push(key, value, sliced);
+	}
+
+	return sliced;
 }
 export const slice = R.curry(_slice);
 
