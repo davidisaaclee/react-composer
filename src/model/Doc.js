@@ -196,13 +196,17 @@ function applyStylesInRange({ start, end }, styles, doc) {
 }
 
 
-// stylesAtPointer :: (Doc.Pointer, Doc) -> StyleSet
-function stylesAtPointer(pointer, doc) {
-	const paragraph = Doc.get(pointer.key, doc);
-	const positionInParagraph = Paragraph.positionFromAbsoluteOffset(pointer.offset, paragraph);
-	const content = Paragraph.nth(
-		positionInParagraph.index,
-		paragraph);
+// stylesForSelection :: (DocSelection Doc.Pointer, Doc) -> StyleSet
+function stylesForSelection(selection, doc) {
+	const paragraph =
+		Doc.get(selection.anchor.key, doc);
+	const positionInParagraph =
+		Paragraph.positionFromAbsoluteOffset(selection.anchor.offset, paragraph);
+	const content =
+		Paragraph.nth(
+			positionInParagraph.index,
+			paragraph);
+
 	return content.styles;
 }
 
@@ -244,7 +248,7 @@ function applyEdit(edit, doc) {
 			Doc.update(
 				pointerRange.start.key,
 				paragraph => Paragraph.insertContent(
-					Content.make(edit.text, stylesAtPointer(edit.selection.anchor, doc)),
+					Content.make(edit.text, stylesForSelection(edit.selection, doc)),
 					pointerRange.start.offset,
 					paragraph)),
 			// Defragment the edited paragraph.
@@ -279,26 +283,26 @@ function applyEdit(edit, doc) {
 		return applyStylesInRange(pointerRange, styles, doc);
 	} else if (edit.type === Edit.types.toggleBold) {
 		const { selection } = edit;
-		const stylesAtAnchor = stylesAtPointer(selection.anchor, doc);
+		const previousStyles = stylesForSelection(selection, doc);
 
 		return applyEdit(
 			Edit.applyStyles(
 				selection,
 				{
-					...stylesAtAnchor,
-					bold: stylesAtAnchor.bold == null ? true : !stylesAtAnchor.bold
+					...previousStyles,
+					bold: previousStyles.bold == null ? true : !previousStyles.bold
 				}),
 			doc);
 	} else if (edit.type === Edit.types.toggleItalic) {
 		const { selection } = edit;
-		const stylesAtAnchor = stylesAtPointer(selection.anchor, doc);
+		const previousStyles = stylesForSelection(selection, doc);
 
 		return applyEdit(
 			Edit.applyStyles(
 				selection,
 				{
-					...stylesAtAnchor,
-					italic: stylesAtAnchor.italic == null ? true : !stylesAtAnchor.italic
+					...previousStyles,
+					italic: previousStyles.italic == null ? true : !previousStyles.italic
 				}),
 			doc);
 	} else {
