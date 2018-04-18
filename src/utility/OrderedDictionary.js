@@ -208,24 +208,29 @@ export const merge = R.curry(_merge);
 //      { key: 'd', value: 5 },
 //    ]
 function _mergeElements(startIndex, count, mergeMethod, dict) {
-	const mergedElement = R.pipe(
-		slice(startIndex, startIndex + count),
-		toList,
-		mergeMethod
-	)(dict);
+	const elementsToMerge =
+		toList(slice(startIndex, startIndex + count, dict));
 
-	return R.pipe(
-		// Remove the elements to be merged from the dictionary.
-		dict => R.reduce(
-			(dict, key) => remove(key, dict),
-			dict,
-			R.map(
-				index => keyAtIndex(index, dict),
-				R.range(startIndex, startIndex + count))),
+	const mergedElement =
+		mergeMethod(elementsToMerge);
 
-		// Insert the merged element.
-		insert(mergedElement.key, mergedElement.value, startIndex),
-	)(dict);
+	let newDict = dict;
+
+	// Remove the elements to be merged from the dictionary.
+	for (let index = startIndex; index < startIndex + count; index++) {
+		const key = keyAtIndex(index, dict);
+		newDict = remove(key, newDict);
+	}
+
+	// Insert the merged element.
+	newDict =
+		insert(
+			mergedElement.key,
+			mergedElement.value,
+			startIndex,
+			newDict);
+
+	return newDict;
 }
 export const mergeElements = R.curry(_mergeElements);
 
