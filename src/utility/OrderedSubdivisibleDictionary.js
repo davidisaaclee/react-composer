@@ -40,6 +40,22 @@ export default ({
 	// makePointer :: (k, number) -> Pointer
 	const makePointer = (key, offset) => ({ key, offset });
 
+	// startPosition :: OSD -> Position
+	// Returns the first position in the dictionary.
+	function startPosition(dict) {
+		return makePosition(0, 0);
+	}
+	
+	// endPosition :: OSD -> Position
+	// Returns the last filled position in the dictionary.
+	function endPosition(dict) {
+		const endIndex =
+			OD.count(dict) - 1;
+		const endOffsetOfEndIndex =
+			elementCount(OD.nth(endIndex, dict));
+
+		return makePosition(endIndex, endOffsetOfEndIndex);
+	}
 
 	// positionFromPointer :: (Pointer, OSD) -> Position
 	function _positionFromPointer(pointer, dict) {
@@ -155,17 +171,17 @@ export default ({
 	//
 	// (ab`c) (def) (gh´i) -> (ab) (i)
 	// (ab`cde´fgh) -> (abfgh)
-	function _removeSlice(startPosition, endPosition, dict) {
+	function _removeSlice(start, end, dict) {
 		const startPositionKey =
-			OD.keyAtIndex(startPosition.index, dict);
+			OD.keyAtIndex(start.index, dict);
 		const endPositionKey =
-			OD.keyAtIndex(endPosition.index, dict);
+			OD.keyAtIndex(end.index, dict);
 
 		if (startPositionKey === endPositionKey) {
 			const elementAfterRemovingSlice =
 				elementRemoveSlice(
-					startPosition.offset,
-					endPosition.offset,
+					start.offset,
+					end.offset,
 					OD.get(startPositionKey, dict));
 
 			return R.pipe(
@@ -175,24 +191,24 @@ export default ({
 					d,
 					R.map(
 						index => OD.keyAtIndex(index, dict),
-						R.range(startPosition.index + 1, endPosition.index))),
+						R.range(start.index + 1, end.index))),
 				// Remove the original element.
 				OD.remove(startPositionKey),
 				// Insert a copy of the element after removing the slice.
 				OD.insert(
 					startPositionKey,
 					elementAfterRemovingSlice,
-					startPosition.index),
+					start.index),
 			)(dict);
 		} else {
 			const before =
 				elementSlice(
 					0,
-					startPosition.offset,
+					start.offset,
 					OD.get(startPositionKey, dict));
 			const after =
 				elementSlice(
-					endPosition.offset,
+					end.offset,
 					elementCount(OD.get(endPositionKey, dict)),
 					OD.get(endPositionKey, dict));
 
@@ -203,17 +219,17 @@ export default ({
 					d,
 					R.map(
 						index => OD.keyAtIndex(index, dict),
-						R.range(startPosition.index + 1, endPosition.index))),
+						R.range(start.index + 1, end.index))),
 				OD.remove(startPositionKey),
 				OD.remove(endPositionKey),
 				OD.insert(
 					startPositionKey,
 					before,
-					startPosition.index),
+					start.index),
 				OD.insert(
 					endPositionKey,
 					after,
-					startPosition.index + 1),
+					start.index + 1),
 			)(dict);
 		}
 	}
