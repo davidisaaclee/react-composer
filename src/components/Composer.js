@@ -89,6 +89,67 @@ function docSelectionFromNativeSelection(selection) {
 		focusPointer);
 }
 
+// queryParagraphNode :: (ParagraphID, Node) -> Node?
+// Returns the text node displaying the specified paragraph, searching from
+// the provided root node, or null if no such node could be found.
+function queryParagraphNode(paragraphID, rootNode) {
+	const selectorForParagraphID =
+		`[${k.paragraphIDAttributeKey}="${paragraphID}"]`;
+	return rootNode.querySelector(selectorForParagraphID);
+}
+
+// nodeAndOffsetFromPointer :: (Doc.Pointer, Node) -> { node: Node, offset: number }?
+// Returns the text node and offset within that node for the specified pointer,
+// searching from the specified root node.
+function nodeAndOffsetFromPointer(pointer, rootNode) {
+	// nodeAndOffsetForCharacterOffset :: (number, Node) -> { node: Node, offset: number }?
+	function nodeAndOffsetForCharacterOffset(offset, root) {
+		let currentOffset = 0;
+		for (let i = 0; i < root.childNodes.length; i++) {
+			const child = root.childNodes[i];
+			if (child.nodeType !== Node.TEXT_NODE) {
+				throw new Error("TODO: Deal with non-text nodes in paragraph node.");
+			}
+
+			if (currentOffset + child.textContent.length < offset) {
+				currentOffset += child.textContent.length;
+				continue;
+			} else {
+				return { node: child, offset: offset - currentOffset };
+			}
+		}
+
+		return null;
+	}
+
+	const paragraphNode =
+		queryParagraphNode(pointer.key, rootNode);
+
+	if (paragraphNode == null) {
+		return null;
+	}
+
+	const nodeAndOffset =
+		nodeAndOffsetForCharacterOffset(
+			pointer.offset,
+			paragraphNode);
+
+	if (nodeAndOffset == null) {
+		throw new Error('Could not find text node');
+	}
+
+	const { node, offset } = nodeAndOffset;
+
+	if (node == null) {
+		// TODO: Uncertain what to do here.
+		// One case that leads here is an empty <p> node.
+		throw new Error(`No text node for paragraph ${pointer.key}`);
+	}
+
+	return { node, offset };
+}
+
+
 function getSelection() {
 	// TODO: Cross-browser support
 	return window.getSelection();
@@ -157,78 +218,23 @@ class Composer extends React.Component {
 
 
 	// -- Helpers
-	
-	// queryParagraphNode :: ParagraphID -> Node?
-	// Returns the text node displaying the specified paragraph, or null if no such node could be found.
-	queryParagraphNode(paragraphID) {
-		if (this.editorContainerRef == null) {
-			throw new Error(errorMessages.queryingForParagraphBeforeReceivedRef);
-		}
-
-		const selectorForParagraphID =
-			`[${k.paragraphIDAttributeKey}="${paragraphID}"]`;
-		return this.editorContainerRef.querySelector(selectorForParagraphID);
-	}
-	
-	// nodeAndOffsetFromPointer :: (Doc.Pointer) -> { node: Node, offset: number }?
-	// Returns the text node and offset within that node for the specified pointer.
-	nodeAndOffsetFromPointer(pointer) {
-		// nodeAndOffsetForCharacterOffset :: (number, Node) -> { node: Node, offset: number }?
-		function nodeAndOffsetForCharacterOffset(offset, root) {
-			let currentOffset = 0;
-			for (let i = 0; i < root.childNodes.length; i++) {
-				const child = root.childNodes[i];
-				if (child.nodeType !== Node.TEXT_NODE) {
-					throw new Error("TODO: Deal with non-text nodes in paragraph node.");
-				}
-
-				if (currentOffset + child.textContent.length < offset) {
-					currentOffset += child.textContent.length;
-					continue;
-				} else {
-					return { node: child, offset: offset - currentOffset };
-				}
-			}
-
-			return null;
-		}
-
-		const paragraphNode =
-			this.queryParagraphNode(pointer.key);
-
-		if (paragraphNode == null) {
-			return null;
-		}
-
-		const nodeAndOffset =
-			nodeAndOffsetForCharacterOffset(
-				pointer.offset,
-				paragraphNode);
-
-		if (nodeAndOffset == null) {
-			throw new Error('Could not find text node');
-		}
-
-		const { node, offset } = nodeAndOffset;
-
-		if (node == null) {
-			// TODO: Uncertain what to do here.
-			// One case that leads here is an empty <p> node.
-			throw new Error(`No text node for paragraph ${pointer.key}`);
-		}
-
-		return { node, offset };
-	}
-
 	// rangeFromSelection :: DocSelection -> Range
 	rangeFromSelection(selection) {
 		const pointerRange =
 			Doc.pointerRangeFromSelection(selection, this.props.document);
 
+		if (this.editorContainerRef == null) {
+			throw new Error(errorMessages.queryingForParagraphBeforeReceivedRef);
+		}
+
 		const start =
-			this.nodeAndOffsetFromPointer(pointerRange.start);
+			nodeAndOffsetFromPointer(
+				pointerRange.start,
+				this.editorContainerRef);
 		const end =
-			this.nodeAndOffsetFromPointer(pointerRange.end);
+			nodeAndOffsetFromPointer(
+				pointerRange.end,
+				this.editorContainerRef);
 
 		const range = document.createRange();
 		range.setStart(start.node, start.offset);
