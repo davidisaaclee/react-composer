@@ -45,6 +45,15 @@ function applyEdit(edit, doc) {
 			Doc.positionFromPointer(pointerRange.start, doc),
 			Doc.positionFromPointer(pointerRange.end, doc));
 
+		function stylesAtPointer(pointer, doc) {
+			const paragraph = Doc.get(pointer.key, doc);
+			const positionInParagraph = Paragraph.positionFromAbsoluteOffset(pointer.offset, paragraph);
+			const content = Paragraph.nth(
+				positionInParagraph.index,
+				paragraph);
+			return content.styles;
+		}
+
 		function stitchBookendsIfNeeded(doc) {
 			if (pointerRange.start.key === pointerRange.end.key) {
 				return doc;
@@ -73,7 +82,7 @@ function applyEdit(edit, doc) {
 			Doc.update(
 				pointerRange.start.key,
 				paragraph => Paragraph.insertContent(
-					Content.plainText(edit.text),
+					Content.make(edit.text, stylesAtPointer(edit.selection.anchor, doc)),
 					pointerRange.start.offset,
 					paragraph)),
 			// Defragment the edited paragraph.
