@@ -270,20 +270,15 @@ class Composer extends React.Component {
 		const handleCommand = (command) => {
 			switch (command.type) {
 				case EditorCommand.types.text:
-					return;
-
 				case EditorCommand.types.paragraphBreak:
-					return;
-
 				case EditorCommand.types.moveFocus:
-					const selection =
-						docSelectionFromNativeSelection(getSelection());
-					this.props.onSelectionChange(selection);
+					this.props.onSelectionChange(
+						docSelectionFromNativeSelection(getSelection()));
 					return;
 
 				default:
 					console.error("Unrecognized command type", command.type);
-					return null;
+					return;
 			}
 		}
 
