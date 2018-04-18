@@ -21,7 +21,7 @@ export default {
 		const insertPosition =
 			Paragraph.positionFromAbsoluteOffset(offset, p);
 
-		const splitParagraph = Paragraph.splitElement(
+		const splitParagraph = Paragraph.splitElementInPlace(
 			insertPosition,
 			generateKey(),
 			generateKey(),
@@ -36,7 +36,7 @@ export default {
 	},
 
 	// removeContentInRange :: (number, number, Paragraph) -> Paragraph
-	removeContentInRange: (start, end, p) => Paragraph.removeSlice(
+	removeContentInRange: (start, end, p) => Paragraph.removeSliceAtSubelement(
 		Paragraph.positionFromAbsoluteOffset(start),
 		Paragraph.positionFromAbsoluteOffset(end),
 		p),

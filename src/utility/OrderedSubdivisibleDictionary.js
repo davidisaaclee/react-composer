@@ -129,11 +129,11 @@ export default ({
 	const containsPointer = R.curry(_containsPointer);
 
 
-	// splitElement :: (Position, k, k, OSD k v) -> OSD k v
+	// splitElementInPlace :: (Position, k, k, OSD k v) -> OSD k v
 	// Splits the element at the specified position into two.
 	// If the specified position is not in the dictionary,
 	// returns the original dictionary.
-	function _splitElement(splitPosition, beforeKey, afterKey, dict) {
+	function _splitElementInPlace(splitPosition, beforeKey, afterKey, dict) {
 		const splitKey =
 			OD.keyAtIndex(
 				splitPosition.index,
@@ -155,10 +155,10 @@ export default ({
 			OD.insert(afterKey, after, splitPosition.index + 1),
 		)(dict);
 	}
-	const splitElement = R.curry(_splitElement);
+	const splitElementInPlace = R.curry(_splitElementInPlace);
 
 
-	// removeSlice :: (Position, Position, OSD k v) -> OSD k v
+	// removeSliceAtSubelement :: (Position, Position, OSD k v) -> OSD k v
 	// Removes the slice between the two specified positions.
 	//
 	// If the slice is contained by a single element, that element
@@ -172,7 +172,7 @@ export default ({
 	//
 	// (ab`c) (def) (gh´i) -> (ab) (i)
 	// (ab`cde´fgh) -> (abfgh)
-	function _removeSlice(start, end, dict) {
+	function _removeSliceAtSubelement(start, end, dict) {
 		const startPositionKey =
 			OD.keyAtIndex(start.index, dict);
 		const endPositionKey =
@@ -234,7 +234,7 @@ export default ({
 			)(dict);
 		}
 	}
-	const removeSlice = R.curry(_removeSlice);
+	const removeSliceAtSubelement = R.curry(_removeSliceAtSubelement);
 
 
 	// sortPointersAscending :: ([Pointer], OSD) -> [Pointer]
@@ -247,21 +247,21 @@ export default ({
 	const sortPointersAscending = R.curry(_sortPointersAscending);
 
 
-	// split :: (Position, k, k, OSD k v) -> { before: OSD k v, after: OSD k v }?
+	// splitAtSubelement :: (Position, k, k, OSD k v) -> { before: OSD k v, after: OSD k v }?
 	// Splits the dictionary into two dictionaries at the specified split position.
 	// If the split position is not within the dictionary, returns null.
-	function _split(splitPosition, beforeKey, afterKey, dict) {
+	function _splitAtSubelement(splitPosition, beforeKey, afterKey, dict) {
 		if (!containsPosition(splitPosition, dict)) {
 			return null;
 		}
 
-		const splitDict = splitElement(splitPosition, beforeKey, afterKey, dict);
+		const splitDict = splitElementInPlace(splitPosition, beforeKey, afterKey, dict);
 		return {
 			before: OD.slice(0, splitPosition.index + 1, splitDict),
 			after: OD.slice(splitPosition.index + 1, OD.count(splitDict), splitDict),
 		};
 	}
-	const split = R.curry(_split);
+	const splitAtSubelement = R.curry(_splitAtSubelement);
 
 
 	// sliceBySubelements :: (Position, Position, OSD k v) -> OSD k v
@@ -272,8 +272,8 @@ export default ({
 	// (ab`c)(d)(e´ef) -> (c)(d)(e)
 	function _sliceBySubelements(start, end, dict) {
 		return R.pipe(
-			removeSlice(startPosition(dict), start),
-			removeSlice(end, endPosition(dict)),
+			removeSliceAtSubelement(startPosition(dict), start),
+			removeSliceAtSubelement(end, endPosition(dict)),
 		)(dict);
 	}
 	const sliceBySubelements = R.curry(_sliceBySubelements);
@@ -296,10 +296,10 @@ export default ({
 		positionFromAbsoluteOffset,
 		containsPosition,
 		containsPointer,
-		splitElement,
-		removeSlice,
+		splitElementInPlace,
+		removeSliceAtSubelement,
 		sortPointersAscending,
-		split,
+		splitAtSubelement,
 		sliceBySubelements,
 		countSubelements,
 	};

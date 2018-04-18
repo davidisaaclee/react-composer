@@ -18,7 +18,7 @@ const Doc = OSD({
 		Paragraph.positionFromAbsoluteOffset(end, paragraph),
 		paragraph),
 
-	removeSlice: (startOffset, endOffset, paragraph) => Paragraph.removeSlice(
+	removeSlice: (startOffset, endOffset, paragraph) => Paragraph.removeSliceAtSubelement(
 		Paragraph.positionFromAbsoluteOffset(startOffset, paragraph),
 		Paragraph.positionFromAbsoluteOffset(endOffset, paragraph),
 		paragraph),
@@ -62,11 +62,11 @@ function applyEdit(edit, doc) {
 
 		return R.pipe(
 			// Remove the selected slice.
-			Doc.removeSlice(
+			Doc.removeSliceAtSubelement(
 				positionRange.start,
 				positionRange.end),
 			// If the selection we just removed spanned multiple paragraphs,
-			// removeSlice did not attempt to merge the bookending paragraphs.
+			// removeSliceAtSubelement did not attempt to merge the bookending paragraphs.
 			// We need to stitch those together now.
 			stitchBookendsIfNeeded,
 			// Insert the text that is replacing the selection.
@@ -92,10 +92,10 @@ function applyEdit(edit, doc) {
 				doc); 
 
 		return R.pipe(
-			Doc.removeSlice(
+			Doc.removeSliceAtSubelement(
 				Doc.positionFromPointer(pointerRange.start, doc),
 				Doc.positionFromPointer(pointerRange.end, doc)),
-			Doc.splitElement(
+			Doc.splitElementInPlace(
 				splitPosition,
 				UUID(),
 				UUID())
