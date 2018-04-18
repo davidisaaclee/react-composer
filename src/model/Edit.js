@@ -11,14 +11,14 @@ const types = {
 	replaceTextWithParagraphBreak: 'replaceTextWithParagraphBreak',
 };
 
-// replaceText :: (DocSelection, string) -> Edit
+// replaceText :: (DocSelection Doc.Pointer, string) -> Edit
 const replaceText = (selection, text) => ({
 	type: types.replaceText,
 	selection,
 	text
 });
 
-// replaceTextWithParagraphBreak :: (DocSelection) -> Edit
+// replaceTextWithParagraphBreak :: (DocSelection Doc.Pointer) -> Edit
 const replaceTextWithParagraphBreak = (selection) => ({
 	type: types.replaceTextWithParagraphBreak,
 	selection,

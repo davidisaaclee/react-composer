@@ -25,7 +25,7 @@ const Doc = OSD({
 });
 
 
-// pointerRangeFromSelection :: (DocSelection Doc.Pointer, Doc) -> Range OSD.Position
+// pointerRangeFromSelection :: (DocSelection Doc.Pointer, Doc) -> Range Doc.Pointer
 function pointerRangeFromSelection(selection, doc) {
 	const [start, end] =
 		Doc.sortPointersAscending(
