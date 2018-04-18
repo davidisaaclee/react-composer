@@ -1,3 +1,9 @@
+// StyleSet ::= {
+//   bold: boolean?,
+//   italic: boolean?,
+//   link: URL?
+// }
+// where URL ::= string
 
 // Content ::= { text: string, styles: StyleSet }
 // A fragment of text content, which is rendered uniformly.
@@ -43,6 +49,7 @@ function slice(start, end, content) {
 }
 
 export {
+	make,
 	plainText,
 
 	removeInRange,

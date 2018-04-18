@@ -1,10 +1,11 @@
 import React from 'react';
+import { compose } from 'ramda';
 
+import * as EditorCommand from 'components/EditorCommand';
 import Doc from 'model/Doc';
 import ParagraphUtils from 'model/Paragraph';
 import * as Edit from 'model/Edit';
 import * as DocSelection from 'model/DocSelection';
-import * as EditorCommand from './EditorCommand';
 
 const k = {
 	paragraphIDAttributeKey: 'data-paragraph-id'
@@ -110,9 +111,28 @@ const Paragraph = ({ paragraph, id, ...restProps }) => (
 	</p>
 );
 
-const ParagraphContent = ({ children, ...restProps }) => (
-	children.text
-);
+const ParagraphContent = ({ children, ...restProps }) => {
+	const identity = x => x;
+
+	let renderContent = identity;
+	if (children.styles.link != null) {
+		renderContent = compose(
+			x => <a href={children.styles.link}>{x}</a>,
+			renderContent);
+	}
+	if (children.styles.italic) {
+		renderContent = compose(
+			x => <em>{x}</em>,
+			renderContent);
+	}
+	if (children.styles.bold) {
+		renderContent = compose(
+			x => <strong>{x}</strong>,
+			renderContent);
+	}
+
+	return renderContent(children.text);
+};
 
 const EditorContainer = ({ editable = false, innerRef, ...restProps }) => (
 	<div
