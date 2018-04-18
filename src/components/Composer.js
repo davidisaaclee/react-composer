@@ -215,11 +215,13 @@ class Composer extends React.Component {
 	constructor(props) {
 		super(props);
 
-		this.handleKeyPress = this.handleKeyPress.bind(this);
+		this.handleKeyPress =
+			this.handleKeyPress.bind(this);
 	}
 
 
 	// -- Helpers
+	
 	// rangeFromSelection :: DocSelection Doc.Pointer -> Range
 	rangeFromSelection(selection) {
 		const pointerRange =
@@ -242,6 +244,11 @@ class Composer extends React.Component {
 		range.setStart(start.node, start.offset);
 		range.setEnd(end.node, end.offset);
 		return range;
+	}
+
+	reportSelection() {
+		this.props.onSelectionChange(
+			docSelectionFromNativeSelection(getSelection()));
 	}
 
 
@@ -268,28 +275,12 @@ class Composer extends React.Component {
 			}
 		}
 
-		const handleCommand = (command) => {
-			switch (command.type) {
-				case EditorCommand.types.text:
-				case EditorCommand.types.paragraphBreak:
-				case EditorCommand.types.moveFocus:
-					this.props.onSelectionChange(
-						docSelectionFromNativeSelection(getSelection()));
-					return;
-
-				default:
-					console.error("Unrecognized command type", command.type);
-					return;
-			}
-		}
-
 		const command =
 			EditorCommand.fromKeyEvent(evt);
 
 		if (command != null) {
-			handleCommand(command);
-
 			const edit = editForCommand(command);
+
 			if (edit != null) {
 				this.props.onEdit(edit);
 				evt.preventDefault();
@@ -328,6 +319,7 @@ class Composer extends React.Component {
 				innerRef={elm => this.editorContainerRef = elm}
 				editable
 				onKeyDown={this.handleKeyPress}
+				onSelect={_ => this.reportSelection()}
 				{...restProps}
 			>
 				{Doc.toList(doc).map(({ key, value }) => (
