@@ -89,7 +89,7 @@ export default ({
 			const currentKey = dict.order[i];
 			const currentElementCount = elementCount(OD.get(currentKey, dict));
 
-			if (currentOffset + currentElementCount < absoluteOffset) {
+			if (currentOffset + currentElementCount <= absoluteOffset) {
 				currentOffset += currentElementCount;
 				continue;
 			} else {
