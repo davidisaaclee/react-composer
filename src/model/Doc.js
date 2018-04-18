@@ -195,6 +195,17 @@ function applyStylesInRange({ start, end }, styles, doc) {
 	return styledDoc;
 }
 
+
+// stylesAtPointer :: (Doc.Pointer, Doc) -> StyleSet
+function stylesAtPointer(pointer, doc) {
+	const paragraph = Doc.get(pointer.key, doc);
+	const positionInParagraph = Paragraph.positionFromAbsoluteOffset(pointer.offset, paragraph);
+	const content = Paragraph.nth(
+		positionInParagraph.index,
+		paragraph);
+	return content.styles;
+}
+
 // applyEdit :: (Edit, Doc) -> Doc
 function applyEdit(edit, doc) {
 	if (edit.type === Edit.types.replaceText) {
@@ -204,15 +215,6 @@ function applyEdit(edit, doc) {
 		const positionRange = Range.make(
 			Doc.positionFromPointer(pointerRange.start, doc),
 			Doc.positionFromPointer(pointerRange.end, doc));
-
-		function stylesAtPointer(pointer, doc) {
-			const paragraph = Doc.get(pointer.key, doc);
-			const positionInParagraph = Paragraph.positionFromAbsoluteOffset(pointer.offset, paragraph);
-			const content = Paragraph.nth(
-				positionInParagraph.index,
-				paragraph);
-			return content.styles;
-		}
 
 		function stitchBookendsIfNeeded(doc) {
 			if (pointerRange.start.key === pointerRange.end.key) {
@@ -271,11 +273,22 @@ function applyEdit(edit, doc) {
 		)(doc);
 	} else if (edit.type === Edit.types.applyStyles) {
 		const { selection, styles } = edit;
-
 		const pointerRange =
 			pointerRangeFromSelection(selection, doc);
 
 		return applyStylesInRange(pointerRange, styles, doc);
+	} else if (edit.type === Edit.types.toggleBold) {
+		const { selection } = edit;
+		const stylesAtAnchor = stylesAtPointer(selection.anchor, doc);
+
+		return applyEdit(
+			Edit.applyStyles(
+				selection,
+				{
+					...stylesAtAnchor,
+					bold: stylesAtAnchor.bold == null ? true : !stylesAtAnchor.bold
+				}),
+			doc);
 	} else {
 		console.error("Unhandled edit type:", edit.type);
 		return doc;

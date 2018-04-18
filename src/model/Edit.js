@@ -11,6 +11,8 @@ const types = {
 	replaceTextWithParagraphBreak: 'replaceTextWithParagraphBreak',
 
 	applyStyles: 'applyStyles',
+
+	toggleBold: 'toggleBold',
 };
 
 // replaceText :: (DocSelection Doc.Pointer, string) -> Edit
@@ -33,11 +35,18 @@ const applyStyles = (selection, styles) => ({
 	styles
 });
 
+// toggleBold :: (DocSelection Doc.Pointer) -> Edit
+const toggleBold = (selection) => ({
+	type: types.toggleBold,
+	selection
+});
+
 
 export {
 	types,
 	replaceText,
 	replaceTextWithParagraphBreak,
 	applyStyles,
+	toggleBold,
 };
 

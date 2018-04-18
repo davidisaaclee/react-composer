@@ -255,9 +255,8 @@ class Composer extends React.Component {
 						docSelectionFromNativeSelection(getSelection()));
 
 				case EditorCommand.types.bold:
-					return Edit.applyStyles(
-						docSelectionFromNativeSelection(getSelection()),
-						{ bold: true });
+					return Edit.toggleBold(
+						docSelectionFromNativeSelection(getSelection()));
 
 				case EditorCommand.types.italicize:
 					return Edit.applyStyles(
