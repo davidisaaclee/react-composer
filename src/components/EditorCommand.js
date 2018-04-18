@@ -22,8 +22,22 @@ const paragraphBreak = make(types.paragraphBreak);
 
 // fromKeyEvent :: KeyEvent -> EditorCommand?
 function fromKeyEvent(keyEvent) {
+
+	function isModifierKeyEvent(keyEvent) {
+		const modifierKeys = {
+			'Shift': true,
+			'Control': true,
+			'Meta': true,
+			'Alt': true,
+		};
+
+		return modifierKeys[keyEvent.key];
+	}
+
 	if (keyEvent.key === 'Enter') {
 		return paragraphBreak;
+	} else if (isModifierKeyEvent(keyEvent)) {
+		return null;
 	} else {
 		return text(keyEvent.key);
 	}

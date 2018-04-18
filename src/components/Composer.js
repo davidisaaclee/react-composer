@@ -299,7 +299,7 @@ class Composer extends React.Component {
 				suppressContentEditableWarning
 				innerRef={elm => this.editorContainerRef = elm}
 				editable
-				onKeyPress={this.handleKeyPress}
+				onKeyDown={this.handleKeyPress}
 				{...restProps}
 			>
 				{Doc.toList(doc).map(({ key, value }) => (
