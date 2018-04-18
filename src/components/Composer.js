@@ -199,6 +199,7 @@ const EditorContainer = ({ editable = false, innerRef, ...restProps }) => (
 	<div
 		ref={innerRef}
 		contentEditable={editable}
+		suppressContentEditableWarning
 		{...restProps}
 	/>
 );
@@ -324,7 +325,6 @@ class Composer extends React.Component {
 
 		return (
 			<EditorContainer
-				suppressContentEditableWarning
 				innerRef={elm => this.editorContainerRef = elm}
 				editable
 				onKeyDown={this.handleKeyPress}
