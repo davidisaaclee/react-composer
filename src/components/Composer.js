@@ -15,7 +15,7 @@ const errorMessages = {
 	couldNotFindParagraphIDForSelectionAnchor: anchorNode => `Could not find paragraph ID for selection anchor node: ${anchorNode}.`,
 	couldNotFindParagraphIDForSelectionFocus: focusNode => `Could not find paragraph ID for selection focus node: ${focusNode}.`,
 	selectNontextNode: selection => `Attempted selection on non-text nodes: ${selection}`,
-	queryingForParagraphBeforeReceivedRef: `Attempted to calculate DOM node and offset before receiving ref.`,
+	queryingForParagraphWithoutEditorContainerRef: `Attempted to calculate DOM node and offset without editor container ref.`,
 };
 
 
@@ -221,30 +221,6 @@ class Composer extends React.Component {
 
 
 	// -- Helpers
-	
-	// rangeFromSelection :: DocSelection Doc.Pointer -> Range
-	rangeFromSelection(selection) {
-		const pointerRange =
-			Doc.pointerRangeFromSelection(selection, this.props.document);
-
-		if (this.editorContainerRef == null) {
-			throw new Error(errorMessages.queryingForParagraphBeforeReceivedRef);
-		}
-
-		const start =
-			nodeAndOffsetFromPointer(
-				pointerRange.start,
-				this.editorContainerRef);
-		const end =
-			nodeAndOffsetFromPointer(
-				pointerRange.end,
-				this.editorContainerRef);
-
-		const range = document.createRange();
-		range.setStart(start.node, start.offset);
-		range.setEnd(end.node, end.offset);
-		return range;
-	}
 
 	reportSelection() {
 		this.props.onSelectionChange(
@@ -296,7 +272,24 @@ class Composer extends React.Component {
 		windowSelection.removeAllRanges();
 
 		if (selection != null) {
-			windowSelection.addRange(this.rangeFromSelection(selection));
+			if (this.editorContainerRef == null) {
+				throw new Error(errorMessages.queryingForParagraphWithoutEditorContainerRef);
+			}
+
+			const anchor =
+				nodeAndOffsetFromPointer(
+					selection.anchor,
+					this.editorContainerRef);
+			const focus =
+				nodeAndOffsetFromPointer(
+					selection.focus,
+					this.editorContainerRef);
+
+			windowSelection.setBaseAndExtent(
+				anchor.node,
+				anchor.offset,
+				focus.node,
+				focus.offset);
 		}
 	}
 
