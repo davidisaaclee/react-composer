@@ -13,6 +13,8 @@ const types = {
 	applyStyles: 'applyStyles',
 
 	toggleBold: 'toggleBold',
+
+	toggleItalic: 'toggleItalic',
 };
 
 // replaceText :: (DocSelection Doc.Pointer, string) -> Edit
@@ -41,6 +43,12 @@ const toggleBold = (selection) => ({
 	selection
 });
 
+// toggleItalic :: (DocSelection Doc.Pointer) -> Edit
+const toggleItalic = (selection) => ({
+	type: types.toggleItalic,
+	selection
+});
+
 
 export {
 	types,
@@ -48,5 +56,6 @@ export {
 	replaceTextWithParagraphBreak,
 	applyStyles,
 	toggleBold,
+	toggleItalic,
 };
 

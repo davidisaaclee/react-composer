@@ -259,9 +259,8 @@ class Composer extends React.Component {
 						docSelectionFromNativeSelection(getSelection()));
 
 				case EditorCommand.types.italicize:
-					return Edit.applyStyles(
-						docSelectionFromNativeSelection(getSelection()),
-						{ italic: true });
+					return Edit.toggleItalic(
+						docSelectionFromNativeSelection(getSelection()));
 
 				default:
 					console.error("Unrecognized command type", command.type);

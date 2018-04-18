@@ -289,6 +289,18 @@ function applyEdit(edit, doc) {
 					bold: stylesAtAnchor.bold == null ? true : !stylesAtAnchor.bold
 				}),
 			doc);
+	} else if (edit.type === Edit.types.toggleItalic) {
+		const { selection } = edit;
+		const stylesAtAnchor = stylesAtPointer(selection.anchor, doc);
+
+		return applyEdit(
+			Edit.applyStyles(
+				selection,
+				{
+					...stylesAtAnchor,
+					italic: stylesAtAnchor.italic == null ? true : !stylesAtAnchor.italic
+				}),
+			doc);
 	} else {
 		console.error("Unhandled edit type:", edit.type);
 		return doc;
