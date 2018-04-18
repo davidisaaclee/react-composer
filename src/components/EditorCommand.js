@@ -48,11 +48,20 @@ function fromKeyEvent(keyEvent) {
 		return modifierKeys[keyEvent.key];
 	}
 
+	function isCommandKeyEvent(keyEvent) {
+		// If the control key or the meta key is held down, assume that
+		// the keypress represents intent to perform a command (and not
+		// type text).
+		return keyEvent.ctrlKey || keyEvent.metaKey;
+	}
+
 	if (keyEvent.key === 'Enter') {
 		return paragraphBreak;
 	} else if (isArrowKeyEvent(keyEvent)) {
 		return moveFocus;
 	} else if (isModifierKeyEvent(keyEvent)) {
+		return null;
+	} else if (isCommandKeyEvent(keyEvent)) {
 		return null;
 	} else {
 		return text(keyEvent.key);
