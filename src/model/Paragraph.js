@@ -13,6 +13,45 @@ const Paragraph = OSD({
 
 const generateKey = () => UUID();
 
+// defragment :: Paragraph -> Paragraph
+function defragment(paragraph) {
+	const contents = Paragraph.toList(paragraph);
+	let defragmentedParagraph = Paragraph.empty;
+
+	for (let index = 0; index < contents.length; index++) {
+		const content = contents[index];
+
+		if (index === 0) {
+			defragmentedParagraph = Paragraph.push(
+				content.key,
+				content.value,
+				defragmentedParagraph);
+		} else {
+			const previousContent = {
+				key: Paragraph.keyAtIndex(Paragraph.count(defragmentedParagraph) - 1, defragmentedParagraph),
+				value: Paragraph.nth(Paragraph.count(defragmentedParagraph) - 1, defragmentedParagraph),
+			};
+
+			if (Content.equivalentStyles(previousContent.value.styles, content.value.styles)) {
+				defragmentedParagraph = Paragraph.set(
+					previousContent.key,
+					{
+						...previousContent.value,
+						text: previousContent.value.text + content.value.text
+					},
+					defragmentedParagraph);
+			} else {
+				defragmentedParagraph = Paragraph.push(
+					content.key,
+					content.value,
+					defragmentedParagraph);
+			}
+		}
+	}
+
+	return defragmentedParagraph;
+}
+
 export default {
 	...Paragraph,
 
@@ -44,11 +83,7 @@ export default {
 	// characterCount :: Paragraph -> number
 	characterCount: Paragraph.countSubelements,
 
-	// TODO
 	// defragment :: Paragraph -> Paragraph
-	defragment: paragraph => Paragraph.fromArray([{
-		key: generateKey(),
-		value: Content.plainText(Paragraph.toValuesList(paragraph).map(R.prop('text')).join(''))
-	}]),
+	defragment,
 };
 

@@ -63,5 +63,6 @@ export {
 	characterCount,
 	split,
 	slice,
+	equivalentStyles,
 };
 
