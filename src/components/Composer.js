@@ -63,7 +63,7 @@ function docSelectionFromNativeSelection(selection) {
 		if (node.nodeType === Node.TEXT_NODE) {
 			return {
 				key: ancestorParagraphIDForNode(node),
-				offset: characterOffsetForNodeWithinParagraphNode(node)
+				offset: characterOffsetForNodeWithinParagraphNode(node) + offset
 			};
 		} else if (isParagraphNode(node)) {
 			return {
