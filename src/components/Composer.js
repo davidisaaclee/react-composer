@@ -50,35 +50,42 @@ function characterOffsetForNodeWithinParagraphNode(node) {
 	return characterOffset;
 }
 
+// isParagraphNode :: Node -> boolean
+function isParagraphNode(node) {
+	return node.getAttribute(k.paragraphIDAttributeKey) != null;
+}
+
 // docSelectionFromNativeSelection :: Selection -> DocSelection Doc.Pointer
 function docSelectionFromNativeSelection(selection) {
-	if (selection.anchorNode.nodeType !== Node.TEXT_NODE || selection.focusNode.nodeType !== Node.TEXT_NODE) {
-		throw new Error(errorMessages.selectNontextNode(selection));
+	// docPointerFromSelectionPoint :: (Node, number) -> Doc.Pointer
+	function docPointerFromSelectionPoint(node, offset) {
+		if (node.nodeType === Node.TEXT_NODE) {
+			return {
+				key: ancestorParagraphIDForNode(node),
+				offset: characterOffsetForNodeWithinParagraphNode(node)
+			};
+		} else if (isParagraphNode(node)) {
+			return {
+				key: node.getAttribute(k.paragraphIDAttributeKey),
+				offset: 0
+			};
+		} else {
+			throw new Error(errorMessages.selectNontextNode(selection));
+		}
 	}
+	
+	const anchorPointer =
+		docPointerFromSelectionPoint(
+			selection.anchorNode,
+			selection.anchorOffset);
+	const focusPointer =
+		docPointerFromSelectionPoint(
+			selection.focusNode,
+			selection.focusOffset);
 
-	const anchorParagraphID =
-		ancestorParagraphIDForNode(selection.anchorNode);
-	const focusParagraphID =
-		ancestorParagraphIDForNode(selection.focusNode);
-
-	if (anchorParagraphID == null) {
-		throw new Error(errorMessages.couldNotFindParagraphIDForSelectionAnchor(selection.anchorNode));
-	}
-
-	if (focusParagraphID == null) {
-		throw new Error(errorMessages.couldNotFindParagraphIDForSelectionFocus(selection.focusNode));
-	}
-
-	const anchor = 
-		Doc.makePointer(
-			anchorParagraphID,
-			characterOffsetForNodeWithinParagraphNode(selection.anchorNode) + selection.anchorOffset);
-	const focus =
-		Doc.makePointer(
-			focusParagraphID,
-			characterOffsetForNodeWithinParagraphNode(selection.focusNode) + selection.focusOffset);
-
-	return DocSelection.make(anchor, focus);
+	return DocSelection.make(
+		anchorPointer,
+		focusPointer);
 }
 
 function getSelection() {
