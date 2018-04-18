@@ -42,13 +42,22 @@ function ancestorParagraphIDForNode(node) {
 // that the first character of the specified node would display.
 function characterOffsetForNodeWithinParagraphNode(node) {
 	let characterOffset = 0;
-	let currentNode = node.previousSibling;
-	while (currentNode != null) {
-		characterOffset += currentNode.textContent.length;
+	let currentNode = node;
+
+	while (currentNode.previousSibling != null) {
 		currentNode = currentNode.previousSibling;
+		characterOffset += currentNode.textContent.length;
 	}
 
-	return characterOffset;
+	if (currentNode.parentNode == null) {
+		throw new Error('Attempted to find character offset for node not contained by paragraph node.');
+	}
+	
+	if (isParagraphNode(currentNode.parentNode)) {
+		return characterOffset;
+	} else {
+		return characterOffset + characterOffsetForNodeWithinParagraphNode(currentNode.parentNode);
+	}
 }
 
 // isParagraphNode :: Node -> boolean
@@ -98,23 +107,26 @@ function queryParagraphNode(paragraphID, rootNode) {
 	return rootNode.querySelector(selectorForParagraphID);
 }
 
-// nodeAndOffsetFromPointer :: (Doc.Pointer, Node) -> { node: Node, offset: number }?
+// textNodeAndOffsetFromPointer :: (Doc.Pointer, Node) -> { node: Node, offset: number }?
 // Returns the text node and offset within that node for the specified pointer,
 // searching from the specified root node.
-function nodeAndOffsetFromPointer(pointer, rootNode) {
-	// nodeAndOffsetForCharacterOffset :: (number, Node) -> { node: Node, offset: number }?
-	function nodeAndOffsetForCharacterOffset(offset, root) {
+function textNodeAndOffsetFromPointer(pointer, rootNode) {
+	// textNodeAndOffsetForCharacterOffset :: (number, Node) -> { node: Node, offset: number }?
+	function textNodeAndOffsetForCharacterOffset(offset, root) {
 		let currentOffset = 0;
 		for (let i = 0; i < root.childNodes.length; i++) {
 			const child = root.childNodes[i];
-			if (child.nodeType !== Node.TEXT_NODE) {
-				throw new Error("TODO: Deal with non-text nodes in paragraph node.");
-			}
 
 			if (currentOffset + child.textContent.length < offset) {
 				currentOffset += child.textContent.length;
 				continue;
 			} else {
+				if (child.nodeType !== Node.TEXT_NODE) {
+					// If the node containing the offset is not a text node,
+					// "reset" the offset and find the text node and offset within that node.
+					return textNodeAndOffsetForCharacterOffset(offset - currentOffset, child);
+				}
+
 				return { node: child, offset: offset - currentOffset };
 			}
 		}
@@ -130,7 +142,7 @@ function nodeAndOffsetFromPointer(pointer, rootNode) {
 	}
 
 	const nodeAndOffset =
-		nodeAndOffsetForCharacterOffset(
+		textNodeAndOffsetForCharacterOffset(
 			pointer.offset,
 			paragraphNode);
 
@@ -277,11 +289,11 @@ class Composer extends React.Component {
 			}
 
 			const anchor =
-				nodeAndOffsetFromPointer(
+				textNodeAndOffsetFromPointer(
 					selection.anchor,
 					this.editorContainerRef);
 			const focus =
-				nodeAndOffsetFromPointer(
+				textNodeAndOffsetFromPointer(
 					selection.focus,
 					this.editorContainerRef);
 
