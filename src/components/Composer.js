@@ -36,14 +36,30 @@ function ancestorParagraphIDForNode(node) {
 	}
 }
 
+// characterOffsetForNodeWithinParagraphNode :: Node -> number?
+// Returns the character offset within the containing paragraph
+// that the first character of the specified node would display.
+function characterOffsetForNodeWithinParagraphNode(node) {
+	let characterOffset = 0;
+	let currentNode = node.previousSibling;
+	while (currentNode != null) {
+		characterOffset += currentNode.textContent.length;
+		currentNode = currentNode.previousSibling;
+	}
+
+	return characterOffset;
+}
+
 // docSelectionFromNativeSelection :: Selection -> DocSelection Doc.Pointer
 function docSelectionFromNativeSelection(selection) {
 	if (selection.anchorNode.nodeType !== Node.TEXT_NODE || selection.focusNode.nodeType !== Node.TEXT_NODE) {
 		throw new Error(errorMessages.selectNontextNode(selection));
 	}
 
-	const anchorParagraphID = ancestorParagraphIDForNode(selection.anchorNode);
-	const focusParagraphID = ancestorParagraphIDForNode(selection.focusNode);
+	const anchorParagraphID =
+		ancestorParagraphIDForNode(selection.anchorNode);
+	const focusParagraphID =
+		ancestorParagraphIDForNode(selection.focusNode);
 
 	if (anchorParagraphID == null) {
 		throw new Error(errorMessages.couldNotFindParagraphIDForSelectionAnchor(selection.anchorNode));
@@ -53,11 +69,14 @@ function docSelectionFromNativeSelection(selection) {
 		throw new Error(errorMessages.couldNotFindParagraphIDForSelectionFocus(selection.focusNode));
 	}
 
-	// TODO: There should be an explicitly-defined mapping between `Selection`'s offsets and model offsets.
 	const anchor = 
-		Doc.makePointer(anchorParagraphID, selection.anchorOffset);
+		Doc.makePointer(
+			anchorParagraphID,
+			characterOffsetForNodeWithinParagraphNode(selection.anchorNode) + selection.anchorOffset);
 	const focus =
-		Doc.makePointer(focusParagraphID, selection.focusOffset);
+		Doc.makePointer(
+			focusParagraphID,
+			characterOffsetForNodeWithinParagraphNode(selection.focusNode) + selection.focusOffset);
 
 	return DocSelection.make(anchor, focus);
 }
@@ -127,20 +146,51 @@ class Composer extends React.Component {
 	// nodeAndOffsetFromPointer :: (Doc.Pointer) -> { node: Node, offset: number }?
 	// Returns the text node and offset within that node for the specified pointer.
 	nodeAndOffsetFromPointer(pointer) {
-		const node = this.queryParagraphNode(pointer.key);
-		if (node == null) {
+		// nodeAndOffsetForCharacterOffset :: (number, Node) -> { node: Node, offset: number }?
+		function nodeAndOffsetForCharacterOffset(offset, root) {
+			let currentOffset = 0;
+			for (let i = 0; i < root.childNodes.length; i++) {
+				const child = root.childNodes[i];
+				if (child.nodeType !== Node.TEXT_NODE) {
+					throw new Error("TODO: Deal with non-text nodes in paragraph node.");
+				}
+
+				if (currentOffset + child.textContent.length < offset) {
+					currentOffset += child.textContent.length;
+					continue;
+				} else {
+					return { node: child, offset: offset - currentOffset };
+				}
+			}
+
 			return null;
 		}
 
-		// TODO: This assumes that all tagged paragraphs have a single text node as a child.
-		const textNode = node.firstChild;
-		if (textNode == null) {
+		const paragraphNode =
+			this.queryParagraphNode(pointer.key);
+
+		if (paragraphNode == null) {
+			return null;
+		}
+
+		const nodeAndOffset =
+			nodeAndOffsetForCharacterOffset(
+				pointer.offset,
+				paragraphNode);
+
+		if (nodeAndOffset == null) {
+			throw new Error('Could not find text node');
+		}
+
+		const { node, offset } = nodeAndOffset;
+
+		if (node == null) {
 			// TODO: Uncertain what to do here.
 			// One case that leads here is an empty <p> node.
 			throw new Error(`No text node for paragraph ${pointer.key}`);
 		}
 
-		return { node: textNode, offset: pointer.offset };
+		return { node, offset };
 	}
 
 	// rangeFromSelection :: DocSelection -> Range
