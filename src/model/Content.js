@@ -48,6 +48,13 @@ function slice(start, end, content) {
 	};
 }
 
+// equivalentStyles :: (StyleSet, StyleSet) -> boolean
+function equivalentStyles(style1, style2) {
+	return !!style1.italic === !!style2.italic
+		&& !!style1.bold === !!style2.bold
+		&& ((style1.link == null && style2.link == null) || (style1.link === style2.link));
+}
+
 export {
 	make,
 	plainText,
