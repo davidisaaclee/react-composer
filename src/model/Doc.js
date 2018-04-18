@@ -45,6 +45,21 @@ function applyEdit(edit, doc) {
 			Doc.positionFromPointer(pointerRange.start, doc),
 			Doc.positionFromPointer(pointerRange.end, doc));
 
+		function stitchBookendsIfNeeded(doc) {
+			if (pointerRange.start.key === pointerRange.end.key) {
+				return doc;
+			}
+
+			return Doc.mergeElements(
+				positionRange.start.index,
+				2,
+				([before, after]) => ({
+					key: before.key,
+					value: Paragraph.merge(before.value, after.value),
+				}),
+				doc)
+		}
+
 		return R.pipe(
 			// Remove the selected slice.
 			Doc.removeSlice(
@@ -53,16 +68,7 @@ function applyEdit(edit, doc) {
 			// If the selection we just removed spanned multiple paragraphs,
 			// removeSlice did not attempt to merge the bookending paragraphs.
 			// We need to stitch those together now.
-			d => (pointerRange.start.key === pointerRange.end.key
-				? d
-				: Doc.mergeElements(
-					positionRange.start.index,
-					positionRange.end.index + 1,
-					([before, after]) => ({
-						key: before.key,
-						value: Paragraph.merge(before.value, after.value),
-					}),
-					d)),
+			stitchBookendsIfNeeded,
 			// Insert the text that is replacing the selection.
 			Doc.update(
 				pointerRange.start.key,
