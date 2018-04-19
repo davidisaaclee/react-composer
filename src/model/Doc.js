@@ -39,6 +39,19 @@ function pointerRangeFromSelection(selection, doc) {
 	return Range.make(start, end);
 }
 
+// positionRangeFromSelection :: (DocSelection Doc.Position, Doc) -> Range Doc.Position
+function positionRangeFromSelection(selection, doc) {
+	const [start, end] =
+		Doc.sortPositionsAscending(
+			[
+				selection.anchor,
+				selection.focus,
+			],
+			doc);
+
+	return Range.make(start, end);
+}
+
 // applyStylesInRange :: (Range Doc.Pointer, StyleSet, Doc) -> Doc
 // Merges the specified style set with the existing styles of content
 // in the specified range.
@@ -431,6 +444,7 @@ export default {
 	...Doc,
 	applyEdit,
 	pointerRangeFromSelection,
+	positionRangeFromSelection,
 	stylesForSelection,
 };
 
