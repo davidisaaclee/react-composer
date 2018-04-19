@@ -439,7 +439,7 @@ function applyEdit(edit, doc) {
 	} else if (edit.type === Edit.types.del) {
 		const { selection } = edit;
 
-		if (DocSelection.isCollapsed(selection)) {
+		if (selection != null && DocSelection.isCollapsed(selection)) {
 			const rangeToDelete = Range.make(
 				selection.anchor,
 				Doc.nextPosition(
