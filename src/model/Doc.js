@@ -239,10 +239,7 @@ function defragment(doc) {
 		defragmentedDoc =
 			Doc.update(
 				paragraphKeys[i],
-				p => {
-					console.log(p);
-					return Paragraph.defragment(p);
-				},
+				p => Paragraph.defragment(p),
 				defragmentedDoc);
 	}
 
@@ -319,7 +316,11 @@ function applyEdit(edit, doc) {
 		const pointerRange =
 			pointerRangeFromSelection(selection, doc);
 
-		return applyStylesInRange(pointerRange, styles, doc);
+		return defragment(
+			applyStylesInRange(
+				pointerRange,
+				styles,
+				doc));
 	} else if (edit.type === Edit.types.toggleBold) {
 		const { selection } = edit;
 		const previousStyles = stylesForSelection(selection, doc);
