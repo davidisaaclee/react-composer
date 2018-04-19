@@ -13,6 +13,7 @@ const types = {
 	bold: 'bold',
 	italicize: 'italicize',
 	addLink: 'addLink',
+	backspace: 'backspace',
 };
 
 const make = (type, fields = {}) => ({ type, ...fields });
