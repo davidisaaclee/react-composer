@@ -434,6 +434,34 @@ function applyEdit(edit, doc) {
 					''),
 				doc);
 		}
+	} else if (edit.type === Edit.types.del) {
+		const { selection } = edit;
+
+		if (DocSelection.isCollapsed(selection)) {
+			const rangeToDelete = Range.make(
+				selection.anchor,
+				Doc.nextPosition(
+					selection.anchor,
+					doc));
+
+			if (Doc.positionEqual(rangeToDelete.start, rangeToDelete.end)) {
+				return doc;
+			}
+
+			return applyEdit(
+				Edit.replaceText(
+					DocSelection.make(
+						rangeToDelete.end,
+						rangeToDelete.start),
+					''),
+				doc);
+		} else {
+			return applyEdit(
+				Edit.replaceText(
+					selection,
+					''),
+				doc);
+		}
 	} else {
 		console.error("Unhandled edit type:", edit.type);
 		return doc;

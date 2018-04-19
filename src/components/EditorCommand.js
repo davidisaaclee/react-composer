@@ -14,6 +14,7 @@ const types = {
 	italicize: 'italicize',
 	addLink: 'addLink',
 	backspace: 'backspace',
+	del: 'del',
 };
 
 const make = (type, fields = {}) => ({ type, ...fields });
@@ -35,6 +36,9 @@ const addLink = make(types.addLink);
 
 // backspace :: EditorCommand
 const backspace = make(types.backspace);
+
+// del :: EditorCommand
+const del = make(types.del);
 
 // fromKeyEvent :: KeyEvent -> EditorCommand?
 function fromKeyEvent(keyEvent) {
@@ -83,6 +87,10 @@ function fromKeyEvent(keyEvent) {
 	function isBackspaceKeyEvent(keyEvent) {
 		return keyEvent.key === 'Backspace';
 	}
+	
+	function isDeleteKeyEvent(keyEvent) {
+		return keyEvent.key === 'Delete';
+	}
 
 	if (keyEvent.key === 'Enter') {
 		return paragraphBreak;
@@ -102,6 +110,8 @@ function fromKeyEvent(keyEvent) {
 		}
 	} else if (isBackspaceKeyEvent(keyEvent)) {
 		return backspace;
+	} else if (isDeleteKeyEvent(keyEvent)) {
+		return del;
 	} else {
 		return text(keyEvent.key);
 	}

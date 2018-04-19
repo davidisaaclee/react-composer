@@ -288,6 +288,10 @@ class Composer extends React.Component {
 					return Edit.backspace(
 						this.currentDocSelection);
 
+				case EditorCommand.types.del:
+					return Edit.del(
+						this.currentDocSelection);
+
 				case EditorCommand.types.addLink:
 					return null;
 
@@ -322,6 +326,7 @@ class Composer extends React.Component {
 				case EditorCommand.types.bold:
 				case EditorCommand.types.italicize:
 				case EditorCommand.types.backspace:
+				case EditorCommand.types.del:
 					break;
 
 				default:

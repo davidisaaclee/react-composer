@@ -68,6 +68,21 @@ function applyEdit(edit, prevDoc, nextDoc, editor) {
 			...editor,
 			selection: DocSelection.makeCollapsed(nextCursorPosition)
 		};
+	} else if (edit.type === Edit.types.del) {
+		if (Doc.count(nextDoc) === 0) {
+			return { ...editor, selection: null }
+		}
+
+		const { selection } = edit;
+
+		const nextCursorPosition = DocSelection.isCollapsed(selection)
+			? selection.anchor
+			: Doc.positionRangeFromSelection(selection, prevDoc).start;
+
+		return {
+			...editor,
+			selection: DocSelection.makeCollapsed(nextCursorPosition)
+		};
 	} else if (
 		edit.type === Edit.types.toggleBold 
 		|| edit.type === Edit.types.toggleItalic 

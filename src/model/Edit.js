@@ -12,6 +12,8 @@ const types = {
 
 	backspace: 'backspace',
 
+	del: 'del',
+
 	applyStyles: 'applyStyles',
 
 	toggleBold: 'toggleBold',
@@ -67,6 +69,12 @@ const backspace = (selection, url) => ({
 	selection,
 });
 
+// del :: (DocSelection Doc.Pointer) -> Edit
+const del = (selection, url) => ({
+	type: types.del,
+	selection,
+});
+
 export {
 	types,
 	replaceText,
@@ -76,5 +84,6 @@ export {
 	toggleItalic,
 	addLink,
 	backspace,
+	del,
 };
 
