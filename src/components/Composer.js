@@ -65,39 +65,6 @@ function isParagraphNode(node) {
 	return node.getAttribute(k.paragraphIDAttributeKey) != null;
 }
 
-// docSelectionFromNativeSelection :: Selection -> DocSelection Doc.Pointer
-function docSelectionFromNativeSelection(selection) {
-	// docPointerFromSelectionPoint :: (Node, number) -> Doc.Pointer
-	function docPointerFromSelectionPoint(node, offset) {
-		if (node.nodeType === Node.TEXT_NODE) {
-			return {
-				key: ancestorParagraphIDForNode(node),
-				offset: characterOffsetForNodeWithinParagraphNode(node) + offset
-			};
-		} else if (isParagraphNode(node)) {
-			return {
-				key: node.getAttribute(k.paragraphIDAttributeKey),
-				offset: 0
-			};
-		} else {
-			throw new Error(errorMessages.selectNontextNode(selection));
-		}
-	}
-	
-	const anchorPointer =
-		docPointerFromSelectionPoint(
-			selection.anchorNode,
-			selection.anchorOffset);
-	const focusPointer =
-		docPointerFromSelectionPoint(
-			selection.focusNode,
-			selection.focusOffset);
-
-	return DocSelection.make(
-		anchorPointer,
-		focusPointer);
-}
-
 // queryParagraphNode :: (ParagraphID, Node) -> Node?
 // Returns the text node displaying the specified paragraph, searching from
 // the provided root node, or null if no such node could be found.
@@ -220,7 +187,7 @@ const EditorContainer = ({ editable = false, innerRef, ...restProps }) => (
 // -- 
 
 // document :: Doc
-// selection :: (DocSelection Doc.Pointer)?
+// selection :: (DocSelection Doc.Position)?
 // onEdit :: Edit -> ()
 // onSelectionChange :: (DocSelection Doc.Position) -> ()
 // onAddLink :: (URL? -> ()) -> ()
@@ -240,7 +207,7 @@ class Composer extends React.Component {
 		this.props.onSelectionChange(this.currentDocSelection);
 	}
 
-	// currentDocSelection :: DocSelection Doc.Pointer?
+	// currentDocSelection :: DocSelection Doc.Position?
 	// Returns the current selection as pointers into the document,
 	// or null if the document is empty.
 	// TODO: It would be nice to handle the case where nothing
@@ -250,9 +217,45 @@ class Composer extends React.Component {
 			return null;
 		}
 
-		return docSelectionFromNativeSelection(getSelection());
+		return this.docSelectionFromNativeSelection(getSelection());
 	}
 
+	// docSelectionFromNativeSelection :: Selection -> DocSelection Doc.Position
+	docSelectionFromNativeSelection(selection) {
+		const ancestorParagraphIndexForNode = (node) => {
+			return Doc.indexOf(
+				ancestorParagraphIDForNode(node),
+				this.props.document);
+		}
+
+		// docPositionFromSelectionPoint :: (Node, number) -> Doc.Position
+		function docPositionFromSelectionPoint(node, offset) {
+			if (node.nodeType === Node.TEXT_NODE) {
+				return Doc.makePosition(
+					ancestorParagraphIndexForNode(node),
+					characterOffsetForNodeWithinParagraphNode(node) + offset);
+			} else if (isParagraphNode(node)) {
+				return Doc.makePosition(
+					node.getAttribute(k.paragraphIDAttributeKey),
+					0);
+			} else {
+				throw new Error(errorMessages.selectNontextNode(selection));
+			}
+		}
+
+		const anchorPosition =
+			docPositionFromSelectionPoint(
+				selection.anchorNode,
+				selection.anchorOffset);
+		const focusPosition =
+			docPositionFromSelectionPoint(
+				selection.focusNode,
+				selection.focusOffset);
+
+		return DocSelection.make(
+			anchorPosition,
+			focusPosition);
+	}
 
 	// -- Events
 
@@ -339,7 +342,7 @@ class Composer extends React.Component {
 		}
 	}
 
-	// renderSelection :: (DocSelection Doc.Pointer)? -> ()
+	// renderSelection :: (DocSelection Doc.Position)? -> ()
 	// Sets the browser's selection range to the specified document selection.
 	// If a null selection is provided, clears the browser selection range.
 	renderSelection(selection) {
@@ -353,11 +356,18 @@ class Composer extends React.Component {
 
 			const anchor =
 				textNodeAndOffsetFromPointer(
-					selection.anchor,
+					Doc.pointerFromPosition(
+						selection.anchor,
+						this.props.document),
 					this.editorContainerRef);
+			if (anchor == null) {
+				debugger;
+			}
 			const focus =
 				textNodeAndOffsetFromPointer(
-					selection.focus,
+					Doc.pointerFromPosition(
+						selection.focus,
+						this.props.document),
 					this.editorContainerRef);
 
 			windowSelection.setBaseAndExtent(

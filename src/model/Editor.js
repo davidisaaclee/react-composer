@@ -3,8 +3,7 @@ import * as Edit from 'model/Edit';
 import * as DocSelection from 'model/DocSelection';
 import Doc from 'model/Doc';
 
-// make :: DocSelection Pointer -> Editor
-// where Pointer ::= { key: string, offset: number }
+// make :: DocSelection Doc.Position -> Editor
 const make = (selection) => ({
 	selection,
 });
@@ -23,14 +22,12 @@ function applyEdit(edit, prevDoc, nextDoc, editor) {
 			: Doc.positionFromPointer(
 				Doc.pointerRangeFromSelection(selection, prevDoc).start,
 				prevDoc);
-		const previousCursorPositionInNewDoc =
-			Doc.pointerFromPosition(previousCursorPosition, nextDoc);
-		const cursorPointerAfterTextInsertion = {
-			...previousCursorPositionInNewDoc,
-			offset: previousCursorPositionInNewDoc.offset + text.length
+		const nextCursorPosition = {
+			...previousCursorPosition,
+			offset: previousCursorPosition.offset + text.length
 		};
 		const newSelection = 
-			DocSelection.makeCollapsed(cursorPointerAfterTextInsertion);
+			DocSelection.makeCollapsed(nextCursorPosition);
 
 		return {
 			...editor,
@@ -45,11 +42,8 @@ function applyEdit(edit, prevDoc, nextDoc, editor) {
 
 		const newParagraphIndex =
 			Doc.indexOf(pointerRange.start.paragraphID, prevDoc) + 1;
-		const newParagraphID =
-			Doc.keyAtIndex(newParagraphIndex, nextDoc);
-
 		const cursorPosition =
-			Doc.makePointer(newParagraphID, 0);
+			Doc.makePosition(newParagraphIndex, 0);
 		const selection = 
 			DocSelection.makeCollapsed(cursorPosition);
 
@@ -64,19 +58,15 @@ function applyEdit(edit, prevDoc, nextDoc, editor) {
 
 		const { selection } = edit;
 
-		const nextCursorPosition = Doc.positionFromPointer(
-			DocSelection.isCollapsed(selection)
-			? Doc.previousPointer(selection.anchor, prevDoc)
-			: Doc.pointerRangeFromSelection(selection, prevDoc).start,
-			prevDoc);
-
-		const cursorPointer = Doc.pointerFromPosition(
-			nextCursorPosition,
-			nextDoc);
+		const nextCursorPosition = DocSelection.isCollapsed(selection)
+			? Doc.previousPosition(selection.anchor, prevDoc)
+			: Doc.positionFromPointer(
+				Doc.pointerRangeFromSelection(selection, prevDoc).start,
+				prevDoc);
 
 		return {
 			...editor,
-			selection: DocSelection.makeCollapsed(cursorPointer)
+			selection: DocSelection.makeCollapsed(nextCursorPosition)
 		};
 	} else if (
 		edit.type === Edit.types.toggleBold 

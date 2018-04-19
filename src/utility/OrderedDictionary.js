@@ -80,13 +80,6 @@ const _get = (key, dict) => dict.all[key];
 export const get = R.curry(_get);
 
 
-// nthKey :: (number, OrderedDictionary k v) -> k?
-function _nthKey(index, dict) {
-	return R.pipe(R.view(lenses.order), R.nth(index))(dict);
-}
-export const nthKey = R.curry(_nthKey);
-
-
 // nth :: (number, OrderedDictionary k v) -> v?
 function _nth(index, dict) {
 	const key = nthKey(index, dict);
@@ -160,6 +153,10 @@ const _keyAtIndex = (index, dict) => R.pipe(
 	R.nth(index)
 )(dict);
 export const keyAtIndex = R.curry(_keyAtIndex);
+
+// nthKey :: (number, OrderedDictionary k v) -> k?
+// Alias for keyAtIndex.
+export const nthKey = keyAtIndex;
 
 
 // count :: OrderedDictionary k v -> number

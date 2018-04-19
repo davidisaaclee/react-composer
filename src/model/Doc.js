@@ -8,6 +8,11 @@ import * as Range from 'model/Range';
 
 import OSD from 'utility/OrderedSubdivisibleDictionary';
 
+// TODO: Move to OSD
+	function positionEqual(p1, p2) {
+		return p1.index === p2.index && p1.offset === p2.offset;
+	}
+
 // Doc ::= OrderedSubdivisibleDictionary ParagraphID Paragraph
 const Doc = OSD({
 	count: Paragraph.characterCount,
@@ -26,11 +31,14 @@ const Doc = OSD({
 });
 
 
-// pointerRangeFromSelection :: (DocSelection Doc.Pointer, Doc) -> Range Doc.Pointer
+// pointerRangeFromSelection :: (DocSelection Doc.Position, Doc) -> Range Doc.Pointer
 function pointerRangeFromSelection(selection, doc) {
 	const [start, end] =
 		Doc.sortPointersAscending(
-			[selection.anchor, selection.focus],
+			[
+				Doc.pointerFromPosition(selection.anchor, doc),
+				Doc.pointerFromPosition(selection.focus, doc),
+			],
 			doc);
 
 	return Range.make(start, end);
@@ -196,31 +204,28 @@ function applyStylesInRange({ start, end }, styles, doc) {
 	return styledDoc;
 }
 
-// isSelectionBackwards :: (DocSelection Doc.Pointer, Doc) -> boolean
+// isSelectionBackwards :: (DocSelection Doc.Position, Doc) -> boolean
 // Returns true if and only if the focus of the selection occurs before
 // the anchor in the document.
 function isSelectionBackwards(selection, doc) {
-	function pointerEqual(p1, p2) {
-		return p1.key === p2.key && p1.offset === p2.offset;
-	}
 
-	if (pointerEqual(selection.focus, selection.anchor)) {
+	if (positionEqual(selection.focus, selection.anchor)) {
 		// Selection is collapsed
 		return false;
 	}
 
 	const selectionRange = pointerRangeFromSelection(selection, doc);
-	return pointerEqual(selectionRange.start, selection.focus);
+	return positionEqual(selectionRange.start, selection.focus);
 }
 
 
-// stylesForSelection :: (DocSelection Doc.Pointer, Doc) -> StyleSet
+// stylesForSelection :: (DocSelection Doc.Position, Doc) -> StyleSet
 function stylesForSelection(selection, doc) {
 	// Returns the styles of the first piece of content in the selection,
 	// starting from the anchor and moving towards the focus.
 	
 	const anchorPosition =
-		Doc.positionFromPointer(selection.anchor, doc);
+		selection.anchor;
 	const positionToUseForStyles = isSelectionBackwards(selection, doc)
 		? Doc.previousPosition(anchorPosition, doc)
 		: Doc.nextPosition(anchorPosition, doc);
@@ -394,12 +399,12 @@ function applyEdit(edit, doc) {
 
 		if (DocSelection.isCollapsed(selection)) {
 			const rangeToDelete = Range.make(
-				Doc.previousPointer(
+				Doc.previousPosition(
 					selection.anchor,
 					doc),
 				selection.anchor);
 
-			if (rangeToDelete.start === rangeToDelete.end) {
+			if (positionEqual(rangeToDelete.start, rangeToDelete.end)) {
 				return doc;
 			}
 

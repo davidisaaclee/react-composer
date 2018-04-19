@@ -8,9 +8,9 @@ const make = (anchor, focus) => ({ anchor, focus });
 const makeCollapsed = (pointer) => make(pointer, pointer);
 
 
-// isCollapsed :: DocSelection Doc.Pointer -> boolean
+// isCollapsed :: DocSelection OSD.Position -> boolean
 function isCollapsed(selection) {
-	return selection.anchor.key === selection.focus.key
+	return selection.anchor.index === selection.focus.index
 		&& selection.anchor.offset === selection.focus.offset;
 }
 
