@@ -373,6 +373,11 @@ function applyEdit(edit, doc) {
 		)(doc);
 	} else if (edit.type === Edit.types.applyStyles) {
 		const { selection, styles } = edit;
+
+		if (selection == null) {
+			return doc;
+		}
+
 		const pointerRange =
 			pointerRangeFromSelection(selection, doc);
 
