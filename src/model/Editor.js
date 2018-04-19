@@ -53,13 +53,19 @@ function applyEdit(edit, prevDoc, nextDoc, editor) {
 	} else if (edit.type === Edit.types.backspace) {
 		const { selection } = edit;
 
-		const cursorPosition = DocSelection.isCollapsed(selection)
-			? Doc.previousPointer(selection.anchor, nextDoc)
-			: Doc.pointerRangeFromSelection(selection, nextDoc).start;
+		const nextCursorPosition = Doc.positionFromPointer(
+			DocSelection.isCollapsed(selection)
+			? Doc.previousPointer(selection.anchor, prevDoc)
+			: Doc.pointerRangeFromSelection(selection, prevDoc).start,
+			prevDoc);
+
+		const cursorPointer = Doc.pointerFromPosition(
+			nextCursorPosition,
+			nextDoc);
 
 		return {
 			...editor,
-			selection: DocSelection.makeCollapsed(cursorPosition)
+			selection: DocSelection.makeCollapsed(cursorPointer)
 		};
 	} else {
 		return editor;
