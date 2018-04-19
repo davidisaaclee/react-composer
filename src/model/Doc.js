@@ -219,9 +219,15 @@ function stylesForSelection(selection, doc) {
 	// starting from the anchor and moving towards the focus.
 	// If selection is collapsed, use the previous character ("continuing"
 	// the style).
-	const positionToUseForStyles = (isSelectionBackwards(selection, doc) || DocSelection.isCollapsed(selection))
+	let positionToUseForStyles = (isSelectionBackwards(selection, doc) || DocSelection.isCollapsed(selection))
 			? Doc.previousPosition(selection.anchor, doc)
 			: selection.anchor;
+	// If we tried to look at the previous position but there was none (at the beginning
+	// of the document), look on the other side of the cursor.
+	positionToUseForStyles = positionToUseForStyles == null
+		? selection.anchor
+		: positionToUseForStyles;
+
 	const paragraph =
 		Doc.nth(
 			positionToUseForStyles.index,
