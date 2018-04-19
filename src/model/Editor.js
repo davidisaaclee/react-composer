@@ -55,7 +55,7 @@ function applyEdit(edit, prevDoc, nextDoc, editor) {
 			: Doc.pointerRangeFromSelection(selection, nextDoc).start;
 
 		return {
-			editor,
+			...editor,
 			selection: DocSelection.makeCollapsed(cursorPosition)
 		};
 	} else {
