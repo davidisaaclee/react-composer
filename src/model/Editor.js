@@ -78,6 +78,19 @@ function applyEdit(edit, prevDoc, nextDoc, editor) {
 			...editor,
 			selection: DocSelection.makeCollapsed(cursorPointer)
 		};
+	} else if (
+		edit.type === Edit.types.toggleBold 
+		|| edit.type === Edit.types.toggleItalic 
+		|| edit.type === Edit.types.addLink 
+		|| edit.type == Edit.types.applyStyles
+	) {
+		// For all of these style application edits,
+		// just retain the selection.
+		const { selection } = edit;
+		return {
+			...editor,
+			selection
+		};
 	} else {
 		return editor;
 	}
