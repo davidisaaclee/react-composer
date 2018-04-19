@@ -10,6 +10,8 @@ const types = {
 
 	replaceTextWithParagraphBreak: 'replaceTextWithParagraphBreak',
 
+	backspace: 'backspace',
+
 	applyStyles: 'applyStyles',
 
 	toggleBold: 'toggleBold',
@@ -58,6 +60,12 @@ const addLink = (selection, url) => ({
 	url
 });
 
+// backspace :: (DocSelection Doc.Pointer) -> Edit
+const backspace = (selection, url) => ({
+	type: types.backspace,
+	selection,
+});
+
 export {
 	types,
 	replaceText,
@@ -66,5 +74,6 @@ export {
 	toggleBold,
 	toggleItalic,
 	addLink,
+	backspace,
 };
 

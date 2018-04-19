@@ -267,6 +267,10 @@ class Composer extends React.Component {
 					return Edit.toggleItalic(
 						docSelectionFromNativeSelection(getSelection()));
 
+				case EditorCommand.types.backspace:
+					return Edit.backspace(
+						docSelectionFromNativeSelection(getSelection()));
+
 				case EditorCommand.types.addLink:
 					return null;
 
@@ -300,6 +304,7 @@ class Composer extends React.Component {
 				case EditorCommand.types.paragraphBreak:
 				case EditorCommand.types.bold:
 				case EditorCommand.types.italicize:
+				case EditorCommand.types.backspace:
 					break;
 
 				default:

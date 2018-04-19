@@ -32,6 +32,9 @@ const italicize = make(types.italicize);
 // addLink :: EditorCommand
 const addLink = make(types.addLink);
 
+// backspace :: EditorCommand
+const backspace = make(types.backspace);
+
 // fromKeyEvent :: KeyEvent -> EditorCommand?
 function fromKeyEvent(keyEvent) {
 	function isArrowKeyEvent(keyEvent) {
@@ -76,6 +79,10 @@ function fromKeyEvent(keyEvent) {
 		return keyEvent.metaKey && keyEvent.key === 'k';
 	}
 
+	function isBackspaceKeyEvent(keyEvent) {
+		return keyEvent.key === 'Backspace';
+	}
+
 	if (keyEvent.key === 'Enter') {
 		return paragraphBreak;
 	} else if (isArrowKeyEvent(keyEvent)) {
@@ -92,6 +99,8 @@ function fromKeyEvent(keyEvent) {
 		} else {
 			return null;
 		}
+	} else if (isBackspaceKeyEvent(keyEvent)) {
+		return backspace;
 	} else {
 		return text(keyEvent.key);
 	}

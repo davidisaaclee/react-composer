@@ -3,6 +3,7 @@ import UUID from 'uuid';
 import Paragraph from 'model/Paragraph';
 import * as Content from 'model/Content';
 import * as Edit from 'model/Edit';
+import * as DocSelection from 'model/DocSelection';
 import * as Range from 'model/Range';
 
 import OSD from 'utility/OrderedSubdivisibleDictionary';
@@ -359,6 +360,34 @@ function applyEdit(edit, doc) {
 				selection,
 				{ link: url }),
 			doc);
+	} else if (edit.type === Edit.types.backspace) {
+		const { selection } = edit;
+
+		if (DocSelection.isCollapsed(selection)) {
+			const rangeToDelete = Range.make(
+				Doc.previousPointer(
+					selection.anchor,
+					doc),
+				selection.anchor);
+
+			if (rangeToDelete.start === rangeToDelete.end) {
+				return doc;
+			}
+
+			return applyEdit(
+				Edit.replaceText(
+					DocSelection.make(
+						rangeToDelete.end,
+						rangeToDelete.start),
+					''),
+				doc);
+		} else {
+			return applyEdit(
+				Edit.replaceText(
+					selection,
+					''),
+				doc);
+		}
 	} else {
 		console.error("Unhandled edit type:", edit.type);
 		return doc;

@@ -47,8 +47,18 @@ function applyEdit(edit, prevDoc, nextDoc, editor) {
 			...editor,
 			selection
 		};
+	} else if (edit.type === Edit.types.backspace) {
+		const { selection } = edit;
+
+		const cursorPosition = DocSelection.isCollapsed(selection)
+			? Doc.previousPointer(selection.anchor, nextDoc)
+			: Doc.pointerRangeFromSelection(selection, nextDoc).start;
+
+		return {
+			editor,
+			selection: DocSelection.makeCollapsed(cursorPosition)
+		};
 	} else {
-		console.error("Unhandled edit type:", edit.type);
 		return editor;
 	}
 }
