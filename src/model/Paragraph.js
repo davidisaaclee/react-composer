@@ -21,6 +21,10 @@ function defragment(paragraph) {
 	for (let index = 0; index < contents.length; index++) {
 		const content = contents[index];
 
+		if (Content.characterCount(content.value) === 0) {
+			continue;
+		}
+
 		if (index === 0) {
 			defragmentedParagraph = Paragraph.push(
 				content.key,
