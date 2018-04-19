@@ -387,13 +387,6 @@ class Composer extends React.Component {
 				innerRef={elm => this.editorContainerRef = elm}
 				editable
 				onKeyDown={this.handleKeyPress}
-				onSelect={_ => {
-					// If the document is empty, don't report selection; there isn't
-					// a valid value of DocSelection that makes sense in this case.
-					if (Doc.count(this.props.document) !== 0) {
-						this.reportSelection();
-					}
-				}}
 				{...restProps}
 			>
 				{Doc.toList(doc).map(({ key, value }) => (
