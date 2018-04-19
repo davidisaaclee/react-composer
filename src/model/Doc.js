@@ -371,10 +371,7 @@ function applyEdit(edit, doc) {
 		return applyEdit(
 			Edit.applyStyles(
 				selection,
-				{
-					...previousStyles,
-					bold: previousStyles.bold == null ? true : !previousStyles.bold
-				}),
+				{ bold: previousStyles.bold == null ? true : !previousStyles.bold }),
 			doc);
 	} else if (edit.type === Edit.types.toggleItalic) {
 		const { selection } = edit;
@@ -383,10 +380,7 @@ function applyEdit(edit, doc) {
 		return applyEdit(
 			Edit.applyStyles(
 				selection,
-				{
-					...previousStyles,
-					italic: previousStyles.italic == null ? true : !previousStyles.italic
-				}),
+				{ italic: previousStyles.italic == null ? true : !previousStyles.italic }),
 			doc);
 	} else if (edit.type === Edit.types.addLink) {
 		const { selection, url } = edit;
