@@ -228,6 +228,10 @@ function isSelectionBackwards(selection, doc) {
 
 // stylesForSelection :: (DocSelection Doc.Position, Doc) -> StyleSet
 function stylesForSelection(selection, doc) {
+	if (selection == null) {
+		return {};
+	}
+
 	// Returns the styles of the first piece of content in the selection,
 	// starting from the anchor and moving towards the focus.
 	// If selection is collapsed, use the previous character ("continuing"
@@ -281,7 +285,7 @@ function defragment(doc) {
 // applyEdit :: (Edit, Doc) -> Doc
 function applyEdit(edit, doc) {
 	if (edit.type === Edit.types.replaceText) {
-		const { selection, text } = edit;
+		const { selection, text, styles: baseStyles } = edit;
 
 		let pointerRange;
 		if (selection === null && Doc.count(doc) === 0) {
@@ -304,10 +308,6 @@ function applyEdit(edit, doc) {
 		const positionRange = Range.make(
 			Doc.positionFromPointer(pointerRange.start, doc),
 			Doc.positionFromPointer(pointerRange.end, doc));
-
-		const baseStyles = selection == null
-			? {}
-			: stylesForSelection(selection, doc);
 
 		function stitchBookendsIfNeeded(doc) {
 			if (pointerRange.start.key === pointerRange.end.key) {
@@ -425,13 +425,15 @@ function applyEdit(edit, doc) {
 					DocSelection.make(
 						rangeToDelete.end,
 						rangeToDelete.start),
-					''),
+					'',
+					{}),
 				doc);
 		} else {
 			return applyEdit(
 				Edit.replaceText(
 					selection,
-					''),
+					'',
+					{}),
 				doc);
 		}
 	} else if (edit.type === Edit.types.del) {
@@ -453,13 +455,15 @@ function applyEdit(edit, doc) {
 					DocSelection.make(
 						rangeToDelete.end,
 						rangeToDelete.start),
-					''),
+					'',
+					{}),
 				doc);
 		} else {
 			return applyEdit(
 				Edit.replaceText(
 					selection,
-					''),
+					'',
+					{}),
 				doc);
 		}
 	} else {

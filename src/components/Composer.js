@@ -186,12 +186,22 @@ const EditorContainer = ({ editable = false, innerRef, ...restProps }) => (
 
 // -- 
 
+// -- Props -- 
+//
 // document :: Doc
+//
 // selection :: (DocSelection Doc.Position)?
+//
 // onEdit :: Edit -> ()
+// 
 // onSelectionChange :: (DocSelection Doc.Position) -> ()
-// onAddLink :: (URL? -> ()) -> ()
-// where URL ::= string
+//
+// onAddLink :: (string? -> ()) -> ()
+// Called when the user is trying to add a link to the selected text
+// with meta+k. Provides a completion handler which accepts either a URL
+// string, or null to cancel the action.
+//
+// stylesForReplacingTextAtSelection :: (DocSelection Doc.Position, Doc) -> StyleSet
 class Composer extends React.Component {
 	constructor(props) {
 		super(props);
@@ -270,7 +280,10 @@ class Composer extends React.Component {
 				case EditorCommand.types.text:
 					return Edit.replaceText(
 							this.currentDocSelection,
-							command.text);
+							command.text,
+						this.props.stylesForReplacingTextAtSelection(
+							this.currentDocSelection,
+							this.props.document));
 
 				case EditorCommand.types.paragraphBreak:
 					return Edit.replaceTextWithParagraphBreak(
@@ -393,6 +406,7 @@ class Composer extends React.Component {
 		const {
 			document: doc, selection,
 			onEdit, onSelectionChange, onAddLink,
+			stylesForReplacingTextAtSelection,
 			...restProps
 		} = this.props;
 
@@ -426,6 +440,7 @@ Composer.defaultProps = {
 	document: Doc.empty,
 	onEdit: () => null,
 	onSelectionChange: () => null,
+	stylesForReplacingTextAtSelection: Doc.stylesForSelection
 };
 
 export default Composer;

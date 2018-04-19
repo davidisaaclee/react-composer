@@ -23,11 +23,12 @@ const types = {
 	addLink: 'addLink',
 };
 
-// replaceText :: (DocSelection Doc.Pointer, string) -> Edit
-const replaceText = (selection, text) => ({
+// replaceText :: (DocSelection Doc.Position, string, StyleSet) -> Edit
+const replaceText = (selection, text, styles) => ({
 	type: types.replaceText,
 	selection,
-	text
+	text,
+	styles,
 });
 
 // replaceTextWithParagraphBreak :: (DocSelection Doc.Pointer) -> Edit
