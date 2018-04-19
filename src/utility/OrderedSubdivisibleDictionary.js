@@ -129,6 +129,52 @@ export default ({
 	const containsPointer = R.curry(_containsPointer);
 
 
+	// incrementPositionByOffset :: (Position, number, OSD) -> Position?
+	function _incrementPositionByOffset(currentPosition, offset, dict) {
+		if (!containsPosition(currentPosition, dict)) {
+			return null;
+		}
+
+		if (offset === 0) {
+			return currentPosition;
+		}
+
+		const currentElement = OD.nth(currentPosition.index, dict);
+		if (elementContainsIndex(currentPosition.offset + offset, currentElement)) {
+			return makePosition(
+				currentPosition.index,
+				currentPosition.offset + offset);
+		} else {
+			const subelementsLeftInCurrentElement =
+				elementCount(currentElement) - currentPosition.offset;
+			const nextElementPosition =
+				makePosition(
+					currentPosition.index + 1,
+					0);
+
+			return incrementPositionByOffset(
+				nextElementPosition,
+				offset - subelementsLeftInCurrentElement,
+				dict);
+		}
+	}
+	const incrementPositionByOffset = R.curry(_incrementPositionByOffset);
+
+
+	// nextPosition :: (Position, OSD) -> Position?
+	function _nextPosition(position, dict) {
+		return incrementPositionByOffset(position, 1, dict);
+	}
+	const nextPosition = R.curry(_nextPosition);
+
+
+	// previousPosition :: (Position, OSD) -> Position?
+	function _previousPosition(position, dict) {
+		return incrementPositionByOffset(position, -1, dict);
+	}
+	const previousPosition = R.curry(_previousPosition);
+
+
 	// splitElementInPlace :: (Position, k, k, OSD k v) -> OSD k v
 	// Splits the element at the specified position into two.
 	// If the specified position is not in the dictionary,
@@ -296,6 +342,9 @@ export default ({
 		positionFromAbsoluteOffset,
 		containsPosition,
 		containsPointer,
+		incrementPositionByOffset,
+		nextPosition,
+		previousPosition,
 		splitElementInPlace,
 		removeSliceAtSubelement,
 		sortPointersAscending,
