@@ -427,5 +427,6 @@ export default {
 	...Doc,
 	applyEdit,
 	pointerRangeFromSelection,
+	stylesForSelection,
 };
 
