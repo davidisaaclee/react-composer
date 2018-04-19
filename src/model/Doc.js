@@ -200,8 +200,17 @@ function applyStylesInRange({ start, end }, styles, doc) {
 // Returns true if and only if the focus of the selection occurs before
 // the anchor in the document.
 function isSelectionBackwards(selection, doc) {
+	function pointerEqual(p1, p2) {
+		return p1.key === p2.key && p1.offset === p2.offset;
+	}
+
+	if (pointerEqual(selection.focus, selection.anchor)) {
+		// Selection is collapsed
+		return false;
+	}
+
 	const selectionRange = pointerRangeFromSelection(selection, doc);
-	return selectionRange.start === selection.focus;
+	return pointerEqual(selectionRange.start, selection.focus);
 }
 
 
