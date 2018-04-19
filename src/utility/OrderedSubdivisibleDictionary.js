@@ -174,6 +174,28 @@ export default ({
 	}
 	const previousPosition = R.curry(_previousPosition);
 
+	// incrementPointerByOffset :: (Pointer, number, OSD) -> Pointer?
+	function _incrementPointerByOffset(pointer, offset, dict) {
+		return pointerFromPosition(
+			incrementPositionByOffset(
+				positionFromPointer(pointer, dict),
+				offset,
+				dict),
+			dict);
+	}
+	const incrementPointerByOffset = R.curry(_incrementPointerByOffset);
+
+	// nextPointer :: (Pointer, OSD) -> Pointer?
+	function _nextPointer(pointer, dict) {
+		return incrementPointerByOffset(pointer, 1, dict);
+	}
+	const nextPointer = R.curry(_nextPointer);
+
+	// previousPointer :: (Pointer, OSD) -> Pointer?
+	function _previousPointer(pointer, dict) {
+		return incrementPointerByOffset(pointer, -1, dict);
+	}
+	const previousPointer = R.curry(_previousPointer);
 
 	// splitElementInPlace :: (Position, k, k, OSD k v) -> OSD k v
 	// Splits the element at the specified position into two.
@@ -345,6 +367,9 @@ export default ({
 		incrementPositionByOffset,
 		nextPosition,
 		previousPosition,
+		incrementPointerByOffset,
+		nextPointer,
+		previousPointer,
 		splitElementInPlace,
 		removeSliceAtSubelement,
 		sortPointersAscending,
