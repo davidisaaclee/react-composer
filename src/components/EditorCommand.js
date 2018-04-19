@@ -42,6 +42,11 @@ const del = make(types.del);
 
 // fromKeyEvent :: KeyEvent -> EditorCommand?
 function fromKeyEvent(keyEvent) {
+	function isCharacterKeyPress(evt) {
+		// TODO: Check that there are no non-character keys which are 1 long.
+		return evt.key.length === 1;
+	}
+
 	function isArrowKeyEvent(keyEvent) {
 		const arrowKeys = {
 			'ArrowLeft': true,
@@ -112,8 +117,10 @@ function fromKeyEvent(keyEvent) {
 		return backspace;
 	} else if (isDeleteKeyEvent(keyEvent)) {
 		return del;
-	} else {
+	} else if (isCharacterKeyPress(keyEvent)) {
 		return text(keyEvent.key);
+	} else {
+		return null;
 	}
 }
 
