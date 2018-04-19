@@ -34,7 +34,7 @@ let editorState = Editor.make(null);
     editorState = { ...editorState, selection };
 
     rerender();
-  }
+  }}
   onAddLink={completion => {
     promptUserForLinkURL(completion);
   }}
