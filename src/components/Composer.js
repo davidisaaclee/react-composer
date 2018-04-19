@@ -237,8 +237,11 @@ class Composer extends React.Component {
 	// -- Helpers
 
 	reportSelection() {
-		this.props.onSelectionChange(
-			docSelectionFromNativeSelection(getSelection()));
+		this.props.onSelectionChange(this.currentDocSelection);
+	}
+
+	get currentDocSelection() {
+		return docSelectionFromNativeSelection(getSelection());
 	}
 
 
@@ -248,28 +251,28 @@ class Composer extends React.Component {
 		// editForCommand :: EditorCommand -> Edit?
 		// Returns an `Edit` object based on the specified command,
 		// or `null` if the command doesn't create an edit.
-		function editForCommand(command) {
+		const editForCommand = (command) => {
 			switch (command.type) {
 				case EditorCommand.types.text:
 					return Edit.replaceText(
-							docSelectionFromNativeSelection(getSelection()),
+							this.currentDocSelection,
 							command.text);
 
 				case EditorCommand.types.paragraphBreak:
 					return Edit.replaceTextWithParagraphBreak(
-						docSelectionFromNativeSelection(getSelection()));
+						this.currentDocSelection);
 
 				case EditorCommand.types.bold:
 					return Edit.toggleBold(
-						docSelectionFromNativeSelection(getSelection()));
+						this.currentDocSelection);
 
 				case EditorCommand.types.italicize:
 					return Edit.toggleItalic(
-						docSelectionFromNativeSelection(getSelection()));
+						this.currentDocSelection);
 
 				case EditorCommand.types.backspace:
 					return Edit.backspace(
-						docSelectionFromNativeSelection(getSelection()));
+						this.currentDocSelection);
 
 				case EditorCommand.types.addLink:
 					return null;
@@ -278,7 +281,7 @@ class Composer extends React.Component {
 					console.error("Unrecognized command type", command.type);
 					return null;
 			}
-		}
+		};
 
 		// handleCommand :: EditorCommand -> ()
 		// Performs any component-specific actions in response to the
@@ -287,7 +290,7 @@ class Composer extends React.Component {
 			switch (command.type) {
 				case EditorCommand.types.addLink:
 					const selection =
-						docSelectionFromNativeSelection(getSelection());
+						this.currentDocSelection;
 
 					const addLinkWithURL = (url) => {
 						if (url == null) {
