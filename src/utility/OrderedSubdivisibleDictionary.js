@@ -40,6 +40,16 @@ export default ({
 	// makePointer :: (k, number) -> Pointer
 	const makePointer = (key, offset) => ({ key, offset });
 
+	// positionEqual :: (Position, Position) -> boolean
+	function positionEqual(p1, p2) {
+		return p1.index === p2.index && p1.offset === p2.offset;
+	}
+
+	// pointerEqual :: (Pointer, Pointer) -> boolean
+	function pointerEqual(p1, p2) {
+		return p1.key === p2.key && p1.offset === p2.offset;
+	}
+
 	// startPosition :: OSD -> Position
 	// Returns the first position in the dictionary.
 	function startPosition(dict) {
@@ -400,6 +410,8 @@ export default ({
 		...OD,
 		makePosition,
 		makePointer,
+		positionEqual,
+		pointerEqual,
 		positionFromPointer,
 		pointerFromPosition,
 		positionFromAbsoluteOffset,

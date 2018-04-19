@@ -8,11 +8,6 @@ import * as Range from 'model/Range';
 
 import OSD from 'utility/OrderedSubdivisibleDictionary';
 
-// TODO: Move to OSD
-	function positionEqual(p1, p2) {
-		return p1.index === p2.index && p1.offset === p2.offset;
-	}
-
 // Doc ::= OrderedSubdivisibleDictionary ParagraphID Paragraph
 const Doc = OSD({
 	count: Paragraph.characterCount,
@@ -208,14 +203,13 @@ function applyStylesInRange({ start, end }, styles, doc) {
 // Returns true if and only if the focus of the selection occurs before
 // the anchor in the document.
 function isSelectionBackwards(selection, doc) {
-
-	if (positionEqual(selection.focus, selection.anchor)) {
+	if (Doc.positionEqual(selection.focus, selection.anchor)) {
 		// Selection is collapsed
 		return false;
 	}
 
 	const selectionRange = pointerRangeFromSelection(selection, doc);
-	return positionEqual(selectionRange.start, selection.focus);
+	return Doc.positionEqual(selectionRange.start, selection.focus);
 }
 
 
@@ -404,7 +398,7 @@ function applyEdit(edit, doc) {
 					doc),
 				selection.anchor);
 
-			if (positionEqual(rangeToDelete.start, rangeToDelete.end)) {
+			if (Doc.positionEqual(rangeToDelete.start, rangeToDelete.end)) {
 				return doc;
 			}
 
