@@ -360,9 +360,6 @@ class Composer extends React.Component {
 						selection.anchor,
 						this.props.document),
 					this.editorContainerRef);
-			if (anchor == null) {
-				debugger;
-			}
 			const focus =
 				textNodeAndOffsetFromPointer(
 					Doc.pointerFromPosition(
