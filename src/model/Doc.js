@@ -195,13 +195,33 @@ function applyStylesInRange({ start, end }, styles, doc) {
 	return styledDoc;
 }
 
+// isSelectionBackwards :: (DocSelection Doc.Pointer, Doc) -> boolean
+// Returns true if and only if the focus of the selection occurs before
+// the anchor in the document.
+function isSelectionBackwards(selection, doc) {
+	const selectionRange = pointerRangeFromSelection(selection, doc);
+	return selectionRange.start === selection.focus;
+}
+
 
 // stylesForSelection :: (DocSelection Doc.Pointer, Doc) -> StyleSet
 function stylesForSelection(selection, doc) {
+	// Returns the styles of the first piece of content in the selection,
+	// starting from the anchor and moving towards the focus.
+	
+	const anchorPosition =
+		Doc.positionFromPointer(selection.anchor, doc);
+	const positionToUseForStyles = isSelectionBackwards(selection, doc)
+		? Doc.previousPosition(anchorPosition, doc)
+		: Doc.nextPosition(anchorPosition, doc);
 	const paragraph =
-		Doc.get(selection.anchor.key, doc);
+		Doc.nth(
+			positionToUseForStyles.index,
+			doc);
 	const positionInParagraph =
-		Paragraph.positionFromAbsoluteOffset(selection.anchor.offset, paragraph);
+		Paragraph.positionFromAbsoluteOffset(
+			positionToUseForStyles.offset,
+			paragraph);
 	const content =
 		Paragraph.nth(
 			positionInParagraph.index,
