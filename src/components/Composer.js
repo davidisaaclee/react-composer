@@ -229,19 +229,21 @@ class Composer extends React.Component {
 		}
 
 		// docPositionFromSelectionPoint :: (Node, number) -> Doc.Position
-		function docPositionFromSelectionPoint(node, offset) {
+		const docPositionFromSelectionPoint = (node, offset) => {
 			if (node.nodeType === Node.TEXT_NODE) {
 				return Doc.makePosition(
 					ancestorParagraphIndexForNode(node),
 					characterOffsetForNodeWithinParagraphNode(node) + offset);
 			} else if (isParagraphNode(node)) {
 				return Doc.makePosition(
-					node.getAttribute(k.paragraphIDAttributeKey),
+					Doc.indexOf(
+						node.getAttribute(k.paragraphIDAttributeKey),
+						this.props.document),
 					0);
 			} else {
 				throw new Error(errorMessages.selectNontextNode(selection));
 			}
-		}
+		};
 
 		const anchorPosition =
 			docPositionFromSelectionPoint(
