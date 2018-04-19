@@ -25,7 +25,7 @@ function defragment(paragraph) {
 			continue;
 		}
 
-		if (index === 0) {
+		if (index === 0 || Paragraph.count(defragmentedParagraph) === 0) {
 			defragmentedParagraph = Paragraph.push(
 				content.key,
 				content.value,
