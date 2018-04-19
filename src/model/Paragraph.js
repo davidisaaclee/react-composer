@@ -53,13 +53,6 @@ function defragment(paragraph) {
 		}
 	}
 
-	if (Paragraph.count(defragmentedParagraph) === 0) {
-		defragmentedParagraph = Paragraph.push(
-			generateKey(),
-			Content.make('', {}),
-			defragmentedParagraph);
-	}
-
 	return defragmentedParagraph;
 }
 

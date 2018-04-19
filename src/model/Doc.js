@@ -253,6 +253,11 @@ function defragment(doc) {
 				defragmentedDoc);
 	}
 
+	// If the document has no content, return an empty document.
+	if (Doc.count(defragmentedDoc) === 1 && Doc.countSubelements(defragmentedDoc) === 0) {
+		return Doc.empty;
+	}
+
 	return defragmentedDoc;
 }
 
@@ -321,17 +326,11 @@ function applyEdit(edit, doc) {
 					pointerRange.start.offset,
 					paragraph)),
 
-			// Defragment the edited paragraph.
-			// We don't need to edit the entire document, since all changes will
+			// Defragment the document.
+			// TODO: We shouldn't need to edit the entire document, since all changes will
 			// be contained in a single paragraph by this point.
-			doc => Doc.update(
-				// Use the position of the selection to find the up-to-date key of the
-				// paragraph at the start of the selection.
-				Doc.keyAtIndex(
-					positionRange.start.index,
-					doc),
-				Paragraph.defragment,
-				doc),
+			// Currently defragmenting the entire document to catch the empty document case.
+			defragment,
 		)(doc);
 	} else if (edit.type === Edit.types.replaceTextWithParagraphBreak) {
 		const pointerRange =

@@ -12,6 +12,10 @@ const make = (selection) => ({
 // applyEdit :: (Edit, Doc, Doc, Editor) -> Editor
 function applyEdit(edit, prevDoc, nextDoc, editor) {
 	if (edit.type === Edit.types.replaceText) {
+		if (Doc.count(nextDoc) === 0) {
+			return { ...editor, selection: null }
+		}
+
 		const { selection, text } = edit;
 
 		const previousCursorPosition = selection == null
@@ -51,6 +55,10 @@ function applyEdit(edit, prevDoc, nextDoc, editor) {
 			selection
 		};
 	} else if (edit.type === Edit.types.backspace) {
+		if (Doc.count(nextDoc) === 0) {
+			return { ...editor, selection: null }
+		}
+
 		const { selection } = edit;
 
 		const nextCursorPosition = Doc.positionFromPointer(
