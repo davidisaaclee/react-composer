@@ -30,6 +30,17 @@ let editorState = Editor.make(null);
 
     rerender();
   }}
+  onSelectionChange={selection => {
+    editorState = { ...editorState, selection };
+
+    rerender();
+  }
+  onAddLink={completion => {
+    promptUserForLinkURL(completion);
+  }}
+  stylesForReplacingTextAtSelection={(selection, docState) => {
+    return Doc.stylesForSelection(selection, docState);
+  }}
 />
 ```
 
