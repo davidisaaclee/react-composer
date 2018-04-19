@@ -31,46 +31,46 @@ const replaceText = (selection, text, styles) => ({
 	styles,
 });
 
-// replaceTextWithParagraphBreak :: (DocSelection Doc.Pointer) -> Edit
+// replaceTextWithParagraphBreak :: (DocSelection Doc.Position) -> Edit
 const replaceTextWithParagraphBreak = (selection) => ({
 	type: types.replaceTextWithParagraphBreak,
 	selection,
 });
 
 
-// applyStyles :: (DocSelection Doc.Pointer, StyleSet) -> Edit
+// applyStyles :: (DocSelection Doc.Position, StyleSet) -> Edit
 const applyStyles = (selection, styles) => ({
 	type: types.applyStyles,
 	selection,
 	styles
 });
 
-// toggleBold :: (DocSelection Doc.Pointer) -> Edit
+// toggleBold :: (DocSelection Doc.Position) -> Edit
 const toggleBold = (selection) => ({
 	type: types.toggleBold,
 	selection
 });
 
-// toggleItalic :: (DocSelection Doc.Pointer) -> Edit
+// toggleItalic :: (DocSelection Doc.Position) -> Edit
 const toggleItalic = (selection) => ({
 	type: types.toggleItalic,
 	selection
 });
 
-// addLink :: (DocSelection Doc.Pointer, string) -> Edit
+// addLink :: (DocSelection Doc.Position, string) -> Edit
 const addLink = (selection, url) => ({
 	type: types.addLink,
 	selection,
 	url
 });
 
-// backspace :: (DocSelection Doc.Pointer) -> Edit
+// backspace :: (DocSelection Doc.Position) -> Edit
 const backspace = (selection, url) => ({
 	type: types.backspace,
 	selection,
 });
 
-// del :: (DocSelection Doc.Pointer) -> Edit
+// del :: (DocSelection Doc.Position) -> Edit
 const del = (selection, url) => ({
 	type: types.del,
 	selection,
