@@ -35,6 +35,10 @@ export const toValuesList = ({ all, order }) => order.map(key => all[key]);
 export const toList = ({ all, order }) => order.map(key => ({ key, value: all[key] }));
 
 
+// keys :: OrderedDictionary k v -> [k]
+export const keys = ({ order }) => order;
+
+
 // toUnorderedObject :: OrderedDictionary k v -> { k -> v }
 export const toUnorderedObject = ({ all }) => all;
 

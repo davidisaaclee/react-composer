@@ -230,6 +230,25 @@ function stylesForSelection(selection, doc) {
 	return content.styles;
 }
 
+// defragment :: Doc -> Doc
+function defragment(doc) {
+	let defragmentedDoc = doc;
+
+	const paragraphKeys = Doc.keys(doc);
+	for (let i = 0; i < paragraphKeys.length; i++) {
+		defragmentedDoc =
+			Doc.update(
+				paragraphKeys[i],
+				p => {
+					console.log(p);
+					return Paragraph.defragment(p);
+				},
+				defragmentedDoc);
+	}
+
+	return defragmentedDoc;
+}
+
 // applyEdit :: (Edit, Doc) -> Doc
 function applyEdit(edit, doc) {
 	if (edit.type === Edit.types.replaceText) {
