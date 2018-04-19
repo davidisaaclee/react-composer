@@ -288,9 +288,16 @@ function applyEdit(edit, doc) {
 					pointerRange.start.offset,
 					paragraph)),
 			// Defragment the edited paragraph.
-			Doc.update(
-				pointerRange.start.key,
-				Paragraph.defragment),
+			// We don't need to edit the entire document, since all changes will
+			// be contained in a single paragraph by this point.
+			doc => Doc.update(
+				// Use the position of the selection to find the up-to-date key of the
+				// paragraph at the start of the selection.
+				Doc.keyAtIndex(
+					positionRange.start.index,
+					doc),
+				Paragraph.defragment,
+				doc),
 		)(doc);
 	} else if (edit.type === Edit.types.replaceTextWithParagraphBreak) {
 		const pointerRange =
