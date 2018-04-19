@@ -217,12 +217,11 @@ function isSelectionBackwards(selection, doc) {
 function stylesForSelection(selection, doc) {
 	// Returns the styles of the first piece of content in the selection,
 	// starting from the anchor and moving towards the focus.
-	
-	const anchorPosition =
-		selection.anchor;
-	const positionToUseForStyles = isSelectionBackwards(selection, doc)
-		? Doc.previousPosition(anchorPosition, doc)
-		: Doc.nextPosition(anchorPosition, doc);
+	// If selection is collapsed, use the previous character ("continuing"
+	// the style).
+	const positionToUseForStyles = (isSelectionBackwards(selection, doc) || DocSelection.isCollapsed(selection))
+			? Doc.previousPosition(selection.anchor, doc)
+			: selection.anchor;
 	const paragraph =
 		Doc.nth(
 			positionToUseForStyles.index,
