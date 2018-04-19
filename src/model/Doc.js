@@ -221,7 +221,7 @@ function isSelectionBackwards(selection, doc) {
 		return false;
 	}
 
-	const selectionRange = pointerRangeFromSelection(selection, doc);
+	const selectionRange = positionRangeFromSelection(selection, doc);
 	return Doc.positionEqual(selectionRange.start, selection.focus);
 }
 
