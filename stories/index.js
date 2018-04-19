@@ -28,6 +28,9 @@ storiesOf('Composer', module)
 			onSelectionChange={selection => store.set({
 				editor: { ...store.state.editor, selection }
 			})}
+			onAddLink={callback => {
+				callback(window.prompt("Enter the URL for the link"));
+			}}
 		/>
   )))
   .add('text decoration', withState({ doc: stylesDocument, editor: initialEditor }, (store) => (

@@ -15,6 +15,8 @@ const types = {
 	toggleBold: 'toggleBold',
 
 	toggleItalic: 'toggleItalic',
+
+	addLink: 'addLink',
 };
 
 // replaceText :: (DocSelection Doc.Pointer, string) -> Edit
@@ -49,6 +51,12 @@ const toggleItalic = (selection) => ({
 	selection
 });
 
+// addLink :: (DocSelection Doc.Pointer, string) -> Edit
+const addLink = (selection, url) => ({
+	type: types.addLink,
+	selection,
+	url
+});
 
 export {
 	types,
@@ -57,5 +65,6 @@ export {
 	applyStyles,
 	toggleBold,
 	toggleItalic,
+	addLink,
 };
 

@@ -11,7 +11,6 @@ const make = (selection) => ({
 
 // applyEdit :: (Edit, Doc, Doc, Editor) -> Editor
 function applyEdit(edit, prevDoc, nextDoc, editor) {
-	// TODO: `selection` can get out of sync with window selection (e.g. on focus).
 	if (edit.type === Edit.types.replaceText) {
 		const pointerRange =
 			Doc.pointerRangeFromSelection(edit.selection, prevDoc);

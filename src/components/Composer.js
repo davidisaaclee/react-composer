@@ -223,6 +223,8 @@ const EditorContainer = ({ editable = false, innerRef, ...restProps }) => (
 // selection :: (DocSelection Doc.Pointer)?
 // onEdit :: Edit -> ()
 // onSelectionChange :: (DocSelection Doc.Position) -> ()
+// onAddLink :: (URL? -> ()) -> ()
+// where URL ::= string
 class Composer extends React.Component {
 	constructor(props) {
 		super(props);
@@ -280,7 +282,18 @@ class Composer extends React.Component {
 		const handleCommand = (command) => {
 			switch (command.type) {
 				case EditorCommand.types.addLink:
-					console.log('TODO: add link');
+					const selection =
+						docSelectionFromNativeSelection(getSelection());
+
+					const addLinkWithURL = (url) => {
+						if (url == null) {
+							return;
+						}
+
+						this.props.onEdit(Edit.addLink(selection, url));
+					};
+
+					this.props.onAddLink(addLinkWithURL);
 					break;
 
 				case EditorCommand.types.text:
@@ -348,7 +361,7 @@ class Composer extends React.Component {
 	render() {
 		const {
 			document: doc, selection,
-			onEdit, onSelectionChange,
+			onEdit, onSelectionChange, onAddLink,
 			...restProps
 		} = this.props;
 

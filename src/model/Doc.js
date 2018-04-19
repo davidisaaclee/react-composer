@@ -325,6 +325,13 @@ function applyEdit(edit, doc) {
 					italic: previousStyles.italic == null ? true : !previousStyles.italic
 				}),
 			doc);
+	} else if (edit.type === Edit.types.addLink) {
+		const { selection, url } = edit;
+		return applyEdit(
+			Edit.applyStyles(
+				selection,
+				{ link: url }),
+			doc);
 	} else {
 		console.error("Unhandled edit type:", edit.type);
 		return doc;
