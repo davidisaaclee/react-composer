@@ -154,7 +154,7 @@ export default ({
 			// If we're trying to increment starting from past the end of an element,
 			// return a position indexing into that element, at a subelement
 			// past the end of the element.
-			const willIncrementToNonnegativeIndex = currentPosition.offset + offset > 0;
+			const willIncrementToNonnegativeIndex = currentPosition.offset + offset >= 0;
 			if (willIncrementToNonnegativeIndex) {
 				return {
 					...currentPosition,
