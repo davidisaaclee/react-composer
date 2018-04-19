@@ -414,7 +414,7 @@ function applyEdit(edit, doc) {
 	} else if (edit.type === Edit.types.backspace) {
 		const { selection } = edit;
 
-		if (DocSelection.isCollapsed(selection)) {
+		if (selection != null && DocSelection.isCollapsed(selection)) {
 			const rangeToDelete = Range.make(
 				Doc.previousPosition(
 					selection.anchor,
