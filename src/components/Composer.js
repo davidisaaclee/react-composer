@@ -396,6 +396,12 @@ class Composer extends React.Component {
 			<EditorContainer
 				innerRef={elm => this.editorContainerRef = elm}
 				editable
+				onSelect={_ => {
+					const currentSelection = this.currentDocSelection;
+					if (!DocSelection.equals(currentSelection, selection)) {
+						this.reportSelection();
+					}
+				}}
 				onKeyDown={this.handleKeyPress}
 				{...restProps}
 			>
