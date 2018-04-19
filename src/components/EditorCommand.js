@@ -12,6 +12,7 @@ const types = {
 	paragraphBreak: 'paragraphBreak',
 	bold: 'bold',
 	italicize: 'italicize',
+	addLink: 'addLink',
 };
 
 const make = (type, fields = {}) => ({ type, ...fields });
@@ -27,6 +28,9 @@ const bold = make(types.bold);
 
 // italicize :: EditorCommand
 const italicize = make(types.italicize);
+
+// addLink :: EditorCommand
+const addLink = make(types.addLink);
 
 // fromKeyEvent :: KeyEvent -> EditorCommand?
 function fromKeyEvent(keyEvent) {
@@ -68,6 +72,10 @@ function fromKeyEvent(keyEvent) {
 		return keyEvent.metaKey && keyEvent.key === 'i';
 	}
 
+	function isAddLinkKeyEvent(keyEvent) {
+		return keyEvent.metaKey && keyEvent.key === 'k';
+	}
+
 	if (keyEvent.key === 'Enter') {
 		return paragraphBreak;
 	} else if (isArrowKeyEvent(keyEvent)) {
@@ -79,6 +87,8 @@ function fromKeyEvent(keyEvent) {
 			return bold;
 		} else if (isItalicizeKeyEvent(keyEvent)) {
 			return italicize;
+		} else if (isAddLinkKeyEvent(keyEvent)) {
+			return addLink;
 		} else {
 			return null;
 		}

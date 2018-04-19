@@ -243,6 +243,9 @@ class Composer extends React.Component {
 	// -- Events
 
 	handleKeyPress(evt) {
+		// editForCommand :: EditorCommand -> Edit?
+		// Returns an `Edit` object based on the specified command,
+		// or `null` if the command doesn't create an edit.
 		function editForCommand(command) {
 			switch (command.type) {
 				case EditorCommand.types.text:
@@ -262,18 +265,43 @@ class Composer extends React.Component {
 					return Edit.toggleItalic(
 						docSelectionFromNativeSelection(getSelection()));
 
+				case EditorCommand.types.addLink:
+					return null;
+
 				default:
 					console.error("Unrecognized command type", command.type);
 					return null;
 			}
 		}
 
+		// handleCommand :: EditorCommand -> ()
+		// Performs any component-specific actions in response to the
+		// specified command.
+		const handleCommand = (command) => {
+			switch (command.type) {
+				case EditorCommand.types.addLink:
+					console.log('TODO: add link');
+					break;
+
+				case EditorCommand.types.text:
+				case EditorCommand.types.paragraphBreak:
+				case EditorCommand.types.bold:
+				case EditorCommand.types.italicize:
+					break;
+
+				default:
+					console.error("Unrecognized command type", command.type);
+					break;
+			}
+		};
+
 		const command =
 			EditorCommand.fromKeyEvent(evt);
 
 		if (command != null) {
-			const edit = editForCommand(command);
+			handleCommand(command);
 
+			const edit = editForCommand(command);
 			if (edit != null) {
 				this.props.onEdit(edit);
 				evt.preventDefault();
