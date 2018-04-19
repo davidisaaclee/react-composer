@@ -12,22 +12,25 @@ const make = (selection) => ({
 // applyEdit :: (Edit, Doc, Doc, Editor) -> Editor
 function applyEdit(edit, prevDoc, nextDoc, editor) {
 	if (edit.type === Edit.types.replaceText) {
-		const pointerRange =
-			Doc.pointerRangeFromSelection(edit.selection, prevDoc);
-		const cursorPosition =
-			Doc.positionFromPointer(pointerRange.start, prevDoc);
-		const cursorPointerInNewDoc =
-			Doc.pointerFromPosition(cursorPosition, nextDoc);
+		const { selection, text } = edit;
+
+		const previousCursorPosition = selection == null
+			? Doc.makePosition(0, 0)
+			: Doc.positionFromPointer(
+				Doc.pointerRangeFromSelection(selection, prevDoc).start,
+				prevDoc);
+		const previousCursorPositionInNewDoc =
+			Doc.pointerFromPosition(previousCursorPosition, nextDoc);
 		const cursorPointerAfterTextInsertion = {
-			...cursorPointerInNewDoc,
-			offset: cursorPointerInNewDoc.offset + edit.text.length
+			...previousCursorPositionInNewDoc,
+			offset: previousCursorPositionInNewDoc.offset + text.length
 		};
-		const selection = 
+		const newSelection = 
 			DocSelection.makeCollapsed(cursorPointerAfterTextInsertion);
 
 		return {
 			...editor,
-			selection
+			selection: newSelection
 		};
 	} else if (edit.type === Edit.types.replaceTextWithParagraphBreak) {
 		const pointerRange =

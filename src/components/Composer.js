@@ -240,7 +240,16 @@ class Composer extends React.Component {
 		this.props.onSelectionChange(this.currentDocSelection);
 	}
 
+	// currentDocSelection :: DocSelection Doc.Pointer?
+	// Returns the current selection as pointers into the document,
+	// or null if the document is empty.
+	// TODO: It would be nice to handle the case where nothing
+	// is selected.
 	get currentDocSelection() {
+		if (Doc.count(this.props.document) === 0) {
+			return null;
+		}
+
 		return docSelectionFromNativeSelection(getSelection());
 	}
 
@@ -378,7 +387,13 @@ class Composer extends React.Component {
 				innerRef={elm => this.editorContainerRef = elm}
 				editable
 				onKeyDown={this.handleKeyPress}
-				onSelect={_ => this.reportSelection()}
+				onSelect={_ => {
+					// If the document is empty, don't report selection; there isn't
+					// a valid value of DocSelection that makes sense in this case.
+					if (Doc.count(this.props.document) !== 0) {
+						this.reportSelection();
+					}
+				}}
 				{...restProps}
 			>
 				{Doc.toList(doc).map(({ key, value }) => (

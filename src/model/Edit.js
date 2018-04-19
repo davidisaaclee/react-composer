@@ -34,6 +34,7 @@ const replaceTextWithParagraphBreak = (selection) => ({
 	selection,
 });
 
+
 // applyStyles :: (DocSelection Doc.Pointer, StyleSet) -> Edit
 const applyStyles = (selection, styles) => ({
 	type: types.applyStyles,

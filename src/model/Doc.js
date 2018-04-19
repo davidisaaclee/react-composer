@@ -250,12 +250,33 @@ function defragment(doc) {
 // applyEdit :: (Edit, Doc) -> Doc
 function applyEdit(edit, doc) {
 	if (edit.type === Edit.types.replaceText) {
-		const pointerRange =
-			pointerRangeFromSelection(edit.selection, doc);
+		const { selection, text } = edit;
+
+		let pointerRange;
+		if (selection === null && Doc.count(doc) === 0) {
+			const paragraphKey = UUID();
+			doc = Doc.push(
+				paragraphKey,
+				Paragraph.push(
+					UUID(),
+					Content.make('', {}),
+					Paragraph.empty),
+				doc);
+			pointerRange = Range.make(
+				Doc.makePointer(paragraphKey, 0),
+				Doc.makePointer(paragraphKey, 0));
+		} else {
+			pointerRange =
+				pointerRangeFromSelection(selection, doc);
+		}
 
 		const positionRange = Range.make(
 			Doc.positionFromPointer(pointerRange.start, doc),
 			Doc.positionFromPointer(pointerRange.end, doc));
+
+		const baseStyles = selection == null
+			? {}
+			: stylesForSelection(selection, doc);
 
 		function stitchBookendsIfNeeded(doc) {
 			if (pointerRange.start.key === pointerRange.end.key) {
@@ -277,17 +298,20 @@ function applyEdit(edit, doc) {
 			Doc.removeSliceAtSubelement(
 				positionRange.start,
 				positionRange.end),
+
 			// If the selection we just removed spanned multiple paragraphs,
 			// removeSliceAtSubelement did not attempt to merge the bookending paragraphs.
 			// We need to stitch those together now.
 			stitchBookendsIfNeeded,
+
 			// Insert the text that is replacing the selection.
 			Doc.update(
 				pointerRange.start.key,
 				paragraph => Paragraph.insertContent(
-					Content.make(edit.text, stylesForSelection(edit.selection, doc)),
+					Content.make(text, baseStyles),
 					pointerRange.start.offset,
 					paragraph)),
+
 			// Defragment the edited paragraph.
 			// We don't need to edit the entire document, since all changes will
 			// be contained in a single paragraph by this point.
