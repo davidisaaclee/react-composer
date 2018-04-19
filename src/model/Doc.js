@@ -333,6 +333,9 @@ function applyEdit(edit, doc) {
 			defragment,
 		)(doc);
 	} else if (edit.type === Edit.types.replaceTextWithParagraphBreak) {
+		// TODO: Add support for paragraph breaks again.
+		return doc;
+
 		const pointerRange =
 			pointerRangeFromSelection(edit.selection, doc);
 		const splitPosition =

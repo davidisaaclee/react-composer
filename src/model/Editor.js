@@ -37,6 +37,9 @@ function applyEdit(edit, prevDoc, nextDoc, editor) {
 			selection: newSelection
 		};
 	} else if (edit.type === Edit.types.replaceTextWithParagraphBreak) {
+		// TODO: Add support for paragraph breaks again.
+		return editor;
+
 		const pointerRange =
 			Doc.pointerRangeFromSelection(edit.selection, prevDoc);
 
