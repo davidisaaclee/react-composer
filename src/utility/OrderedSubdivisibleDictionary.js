@@ -365,6 +365,15 @@ export default ({
 	}
 	const sortPointersAscending = R.curry(_sortPointersAscending);
 
+	// sortPositionsAscending :: ([Position], OSD) -> [Position]
+	function _sortPositionsAscending(positions, dict) {
+		return R.sortWith([
+			R.ascend(position => position.index),
+			R.ascend(position => position.offset)
+		], positions);
+	}
+	const sortPositionsAscending = R.curry(_sortPositionsAscending);
+
 
 	// splitAtSubelement :: (Position, k, k, OSD k v) -> { before: OSD k v, after: OSD k v }?
 	// Splits the dictionary into two dictionaries at the specified split position.
@@ -426,6 +435,7 @@ export default ({
 		splitElementInPlace,
 		removeSliceAtSubelement,
 		sortPointersAscending,
+		sortPositionsAscending,
 		splitAtSubelement,
 		sliceBySubelements,
 		countSubelements,
