@@ -78,14 +78,16 @@ export default ({
 	// positionFromAbsoluteOffset :: (number, OSD) -> Position?
 	// Returns a Position representing the specified subelement offset from
 	// the beginning of the dictionary.
-	// If the offset is not within the dictionary, returns null.
+	// If the offset lies past the end of the dictionary, returns a
+	// position outside the dictionary, indexing into the last element.
+	// If the offset lies before the start of the dictionary, returns null.
 	function _positionFromAbsoluteOffset(absoluteOffset, dict) {
 		if (absoluteOffset < 0) {
 			return null;
 		}
 
 		let currentOffset = 0;
-		for (let i = 0; i < dict.order.length; i++) {
+		for (let i = 0; i < OD.count(dict); i++) {
 			const currentKey = dict.order[i];
 			const currentElementCount = elementCount(OD.get(currentKey, dict));
 
@@ -97,7 +99,13 @@ export default ({
 			}
 		}
 
-		return null;
+		const end = endPosition(dict);
+		return {
+			...end,
+			offset: end.offset + absoluteOffset - currentOffset
+		};
+
+		// return null;
 	}
 	const positionFromAbsoluteOffset = R.curry(_positionFromAbsoluteOffset);
 
@@ -130,9 +138,42 @@ export default ({
 
 
 	// incrementPositionByOffset :: (Position, number, OSD) -> Position?
+	// Returns a new position incremented by the specified subelement offset.
+	// If the new position lies after the last position in the dictionary,
+	// returns a position indexed at the last element, with an offset outside
+	// of that element.
+	// If the new position lies before the first position in the dictionary,
+	// returns null.
 	function _incrementPositionByOffset(currentPosition, offset, dict) {
 		if (!containsPosition(currentPosition, dict)) {
-			return null;
+			if (currentPosition.offset < 0) {
+				// Position is invalid.
+				return null;
+			}
+
+			// If we're trying to increment starting from past the end of an element,
+			// return a position indexing into that element, at a subelement
+			// past the end of the element.
+			const willIncrementToNonnegativeIndex = currentPosition.offset + offset > 0;
+			if (willIncrementToNonnegativeIndex) {
+				return {
+					...currentPosition,
+					offset: currentPosition.offset + offset
+				};
+			} else {
+				if (currentPosition.index === 0) {
+					// We're attempting to decrement past the beginning of the collection.
+					return null;
+				}
+
+				// We're decrementing from past the end of a subelement.
+				// There's probably a smarter way to do this, but for now, walk down
+				// until we're done.
+				return incrementPositionByOffset(
+					{ ...currentPosition, offset: currentPosition.offset - 1 },
+					offset + 1,
+					dict);
+			}
 		}
 
 		if (offset === 0) {
